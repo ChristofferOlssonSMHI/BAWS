@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/plugins/BAWS" >
+        <file>resources/icon1.png</file>
+        <file>resources/icons8-add-file-32.png</file>
+        <file>resources/icons8-download-from-cloud-filled-32.png</file>
+        <file>resources/icons8-merge-files-32.png</file>
+        <file>resources/icons8-query-inner-join-left-filled-32.png</file>
+        <file>resources/icons8-polygon-32.png</file>
+        <file>resources/icons8-registry-editor-32.png</file>
+        <file>resources/icons8-save-32.png</file>
+        <file>resources/icons8-save-as-filled-32.png</file>
+        <file>resources/icons8-world-map-32.png</file>
+        <file>resources/icons8-settings-filled-24.png</file>
+        <file>resources/icons8-settings-filled-32.png</file>
+        <file>resources/icons8-futures-32.png</file>
+        <file>resources/icons8-tif-32.png</file>
+        <file>resources/legend.png</file>
+        <file>resources/smhi-logo.png</file>
+        <file>resources/stw_pic.png</file>
+        <file>resources/icons8-crown-32.png</file>
+        <file>resources/icons8-reanalys-32.png</file>
+        <file>resources/icons8-minus-32.png</file>
+        <file>resources/icons8-categorize-32.png</file>
+        <file>resources/icons8-transfer-32.png</file>
+        <file>resources/icons8-event-24.png</file>
+    </qresource>
+</RCC>
