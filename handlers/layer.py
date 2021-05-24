@@ -309,22 +309,20 @@ class LayerHandler(object):
         refresh = self._refresh()
         return True
 
-    def get_not_valid_feature_ids(self, layer=None, valid_area=10000000):
+    def get_not_valid_feature_ids(self, layer=None):
         """
-        :param valid_area: Valid area (m3). If not used, data look somewhat stochastic..
+        :param valid_area: Valid area (m3). If not used, data will look somewhat stochastic..
         :return:
         """
+        valid_area_mapper = utils.valid_baws_area()
+
         feature_ids = []
         for i, feat in enumerate(layer.getFeatures()):
             geom = feat.geometry()
-            if feat['class'] == 1:
-                if geom.area() < valid_area * 3:
+            valid_area = valid_area_mapper.get(feat['class'])
+            if valid_area:
+                if geom.area() < valid_area:
                     feature_ids.append(i)
-            elif feat['class'] == 4:
-                if geom.area() < valid_area * 50:
-                    feature_ids.append(i)
-            elif geom.area() < valid_area:
-                feature_ids.append(i)
         return feature_ids
 
     @staticmethod

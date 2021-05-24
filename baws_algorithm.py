@@ -56,112 +56,21 @@ from . import subprocesses
 
 
 class BAWSAlgorithm(QgsProcessingAlgorithm):
-    """This is an example algorithm that takes a vector layer and
-    creates a new one just with just those features of the input
-    layer that are selected.
-
-    It is meant to be used as an example of how to create your own
-    algorithms and explain methods and variables used to do it. An
-    algorithm like this will be available in all elements, and there
-    is not need for additional work.
-
-    All Processing algorithms should extend the GeoAlgorithm class.
+    """Based on example algorithm class.. methods could probably be moved to BAWSProvider
     """
-
-    # Constants used to refer to parameters and outputs. They will be
-    # used when calling the algorithm from another algorithm, or when
-    # calling from the QGIS console.
-
-    OUTPUT_LAYER = 'OUTPUT_LAYER'
-    INPUT_LAYER = 'INPUT_LAYER'
-
-    def defineCharacteristics(self):
-        """Here we define the inputs and output of the algorithm, along
-        with some other properties.
-        """
-
-        # The name that the user will see in the toolbox
-        self.name = 'baws_process'
-
-        # The branch of the toolbox under which the algorithm will appear
-        self.group = 'baws_algorithms'
-
-        # We add the input vector layer. It can have any kind of geometry
-        # It is a mandatory (not optional) one, hence the False argument
-        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT_LAYER,
-            self.tr('Input layer'), [QgsProcessing.TypeVectorAnyGeometry], False))
-
-        # We add a vector layer as output
-        self.addOutput(QgsProcessingOutputNumber(self.OUTPUT_LAYER,
-            self.tr('Output layer with selected features')))
-
-    def processAlgorithm(self, progress):
-        """Here is where the processing itself takes place."""
-
-        # The first thing to do is retrieve the values of the parameters
-        # entered by the user
-        inputFilename = self.getParameterValue(self.INPUT_LAYER)
-        output = self.getOutputValue(self.OUTPUT_LAYER)
-
-        # Input layers vales are always a string with its location.
-        # That string can be converted into a QGIS object (a
-        # QgsVectorLayer in this case) using the
-        # processing.getObjectFromUri() method.
-        vectorLayer = dataobjects.getObjectFromUri(inputFilename)
-
-        # And now we can process
-
-        # First we create the output layer. The output value entered by
-        # the user is a string containing a filename, so we can use it
-        # directly
-        settings = QSettings()
-        systemEncoding = settings.value('/UI/encoding', 'System')
-        provider = vectorLayer.dataProvider()
-        writer = QgsVectorFileWriter(output, systemEncoding,
-                                     provider.fields(),
-                                     provider.geometryType(), provider.crs())
-
-        # Now we take the features from input layer and add them to the
-        # output. Method features() returns an iterator, considering the
-        # selection that might exist in layer and the configuration that
-        # indicates should algorithm use only selected features or all
-        # of them
-        features = vector.features(vectorLayer)
-        for f in features:
-            writer.addFeature(f)
-
-        # There is nothing more to do here. We do not have to open the
-        # layer that we have created. The framework will take care of
-        # that, or will handle it if this algorithm is executed within
-        # a complex model
-
     def initializeLayerHandler(self, iface, settings):
-        """
-
-        :return:
-        """
         if not hasattr(self, 'layer_handler'):
             self.layer_handler = handlers.LayerHandler(iface, settings)
 
     def initializeFerryBoxHandler(self, settings):
-        """
-
-        :return:
-        """
         if not hasattr(self, 'ferrybox_handler'):
             self.ferrybox_handler = handlers.FerryBoxHandler(settings)
 
     def initializeRasterHandler(self, rst_template_path):
-        """
-        :return:
-        """
         if not hasattr(self, 'raster_handler'):
             self.raster_handler = handlers.RasterHandler(rst_template_path)
 
     def rasterize_shapefiles(self, args, save_path=None):
-        """
-        :return:
-        """
         thread_process(subprocesses.thread_rasterize,
                        self.raster_handler.raster_meta,
                        save_path,
@@ -190,15 +99,9 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         print("merge_scene_shapes completed in --%.2f sec\n" % (time.time() - start_time))
 
     def intersect_geometries(self):
-        """
-        :return:
-        """
         raise NotImplementedError
 
     def _copy_tif_files(self, settings):
-        """
-        :return:
-        """
         if not any(self.layer_handler.active_tif_layer_names):
             return
         files_to_copy = settings.generate_filepaths(settings.baws_USER_SELECTED_level_1_directory,

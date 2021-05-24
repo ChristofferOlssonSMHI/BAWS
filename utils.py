@@ -15,6 +15,27 @@ from collections import Mapping
 from threading import Thread
 
 
+def valid_baws_area():
+    """
+    valid_area = 5000000 m2 (5 pixels (1km3 x 1km3))
+    1: valid_area * 2
+    2: valid_area
+    3: valid_area
+    4: valid_area * 100
+
+    1: cloud (grey)
+    2: subsurface bloom (yellow)
+    3: surface bloom (orange)
+    4: no data on satellite scene (black)
+    """
+    return {
+        1: 10000000,
+        2: 5000000,
+        3: 5000000,
+        4: 500000000
+    }
+
+
 def sleep_while_saving(file_paths):
     changes = {path: os.path.getmtime(path) for path in file_paths}
     change = True
