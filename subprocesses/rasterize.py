@@ -11,16 +11,22 @@ from rasterio import features
 import geopandas as gpd
 
 
-def filter_feature(gp_shapes, valid_area=10000000):
+def filter_feature(gp_shapes, valid_area=5000000):
     """
     :param gp_shapes: geopandas geodataframe
     :param valid_area: Valid area (m3). If not used, data look somewhat stochastic..
     :return:
     """
-    valid_class_areas = {1: valid_area * 3,
+    # 2020 setup (valid_area=10000000)
+    # valid_class_areas = {1: valid_area * 3,
+    #                      2: valid_area,
+    #                      3: valid_area,
+    #                      4: valid_area * 50}
+
+    valid_class_areas = {1: valid_area * 2,
                          2: valid_area,
                          3: valid_area,
-                         4: valid_area * 50}
+                         4: valid_area * 100}
     boolean = False
     for cls, val_area in valid_class_areas.items():
         cls_boolean = gp_shapes['class'] == cls

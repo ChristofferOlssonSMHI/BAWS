@@ -23,7 +23,7 @@
 __author__ = 'SMHI'
 __date__ = '2019-04-17'
 __copyright__ = '(C) 2019 by SMHI'
-__version__ = '3.1.0'
+__version__ = '3.1.1'
 
 
 # noinspection PyPep8Naming

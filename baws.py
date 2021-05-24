@@ -277,8 +277,9 @@ class BAWSPlugin(object):
         :param path:
         :return:
         """
-        self.provider.baws.ferrybox_handler.read()
-        fb_check = self.provider.baws.ferrybox_handler.process()
+        # self.provider.baws.ferrybox_handler.read()
+        # fb_check = self.provider.baws.ferrybox_handler.process()
+        fb_check = False
 
         print('Loading shapefiles for date %s ' % self.settings.current_working_date)
         if self.settings.reanalyse:

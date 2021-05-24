@@ -50,7 +50,8 @@ class FerryBoxHandler(BaseBoolean):
         """
         :return:
         """
-        station = 38055  # TAVASTLAND
+        # station = 38055  # TAVASTLAND
+        station = 38059  # SVEA
         parameter = 'PHYC'  # Phycocyanin
         channel = 'Cmd'
         start = self.settings.current_working_timestamp
@@ -85,7 +86,7 @@ class FerryBoxHandler(BaseBoolean):
         self.set_time_index()
         self.resample(resample_time='5min')
         self.add_numeric_operation_to_resampled_data(operation='mean')
-        self.exclude_data_based_on_value('value', 0.25)
+        self.exclude_data_based_on_value('value', 0.01)
 
         if self.data.empty:
             print('No usable ferrybox data')

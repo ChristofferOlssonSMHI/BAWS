@@ -216,7 +216,7 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         """
         :return:
         """
-        # Daily fif files
+        # Daily tif files
         if copy_tif_files:
             self._copy_tif_files(settings)
 

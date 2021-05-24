@@ -55,7 +55,7 @@ class RasterHandler(object):
         :param gdf:
         :return:
         """
-        gdf[u'geometry'] = gdf.buffer(0)
+        gdf['geometry'] = gdf.buffer(0)
 
     def read_shp(self, path):
         """
