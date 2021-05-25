@@ -74,7 +74,7 @@ class Settings(object):
         self.__version__ = version_number
         self.base_directory = os.path.dirname(os.path.realpath(__file__))
         self.settings_directory = os.path.join(self.base_directory, 'etc')
-        self.local_settings_folder = os.path.join(os.path.splitdrive(self.base_directory)[0], 'BAWS')
+        self.local_settings_folder = os.path.join(os.path.splitdrive(self.base_directory)[0], '\\BAWS')
 
         self.user = os.path.expanduser('~').split('\\')[-1]
         print('USER: {}'.format(self.user))

@@ -10,6 +10,7 @@ from builtins import object
 from shutil import copyfile
 from .. import readers
 from .. import writers
+import os
 
 
 class TESTHandler(object):
