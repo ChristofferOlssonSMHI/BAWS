@@ -375,6 +375,10 @@ class Settings(object):
             return True
 
     @property
+    def data_in_production_folder_with_working_date(self):
+        return os.path.isfile(self.cyano_daymap_path)
+
+    @property
     def current_working_date(self):
         if self.selected_date:
             return self.selected_date.strftime("%Y%m%d")

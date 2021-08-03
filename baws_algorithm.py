@@ -71,10 +71,15 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
             self.raster_handler = handlers.RasterHandler(rst_template_path)
 
     def rasterize_shapefiles(self, args, save_path=None):
-        thread_process(subprocesses.thread_rasterize,
-                       self.raster_handler.raster_meta,
+        for fid in args:
+            thread_process(subprocesses.rasterize_file,
+                           self.raster_handler.raster_meta,
+                           save_path,
+                           fid)
+        thread_process(subprocesses.check_while_saving,
                        save_path,
-                       args)
+                       '.tiff',
+                       len(args))
 
     def merge_selected_shapefiles(self, settings, categorize=True):
         """

@@ -26,6 +26,8 @@ import os
 
 import shapely
 import descartes
+import rasterio as rio
+import numpy as np
 
 from .. import readers
 from .. import writers
@@ -539,8 +541,6 @@ class LayerHandler(object):
         :return:
         """
         # TODO Move to RasterHandler
-        import rasterio as rio
-        import numpy as np
         print('\nCreating 7day composite..')
         file_generator = self.select_files_for_composite()
         zeros = np.array(())

@@ -246,8 +246,9 @@ class BAWSPlugin(object):
         """
         :return:
         """
-        if self.settings.current_working_timestamp < self.settings.timestamp_yesterday \
-                and self.settings.current_working_timestamp in self.settings.log.dict:
+        if (self.settings.current_working_timestamp < self.settings.timestamp_yesterday
+            and self.settings.current_working_timestamp in self.settings.log.dict) \
+                or self.settings.data_in_production_folder_with_working_date:
             selected_data_source = self.qmb_reanalysis()
         else:
             selected_data_source = 'raw'
@@ -270,7 +271,7 @@ class BAWSPlugin(object):
         self._load_shapefiles(path=shp_path, categorize=True)
         self._load_baltic_coastline()
 
-        print('\nBAWS task completed!')
+        # print('\nBAWS task completed!')
 
     def _load_shapefiles(self, path='', categorize=False):
         """
@@ -403,14 +404,13 @@ class BAWSPlugin(object):
 
     def _change_attribute_value(self):
         """
-
         :return:
         """
         selected_class_value = self.qmb_change_attribute_value()
         if selected_class_value:
             layer_name = None
             for name in self.provider.baws.layer_handler.active_layers_name:
-                if name == 'Cyano_merged':
+                if name == 'Cyano_merged' or name.startswith('cyano_daymap_'):
                     layer_name = name
                     break
 
@@ -590,6 +590,7 @@ class BAWSPlugin(object):
             user_answer = self.qmb(*('BAWS (%s) Question' % __version__, question))
             if user_answer:
                 self.provider.baws.layer_handler.delete_layers(all=True)
+                self.settings.reset_folder(self.settings.user_temporary_folder)
 
     @staticmethod
     def qfd(*args):
