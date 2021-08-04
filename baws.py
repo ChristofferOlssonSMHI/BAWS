@@ -256,7 +256,11 @@ class BAWSPlugin(object):
         if selected_data_source == 'old':
             self.settings.reanalyse = True
             rst_path = self.settings.baws_USER_SELECTED_tiff_archive_directory
-            shp_path = self.settings.baws_USER_SELECTED_manuell_algtolkning_directory
+
+            if self.settings.data_in_production_folder_with_working_date:
+                shp_path = self.settings.baws_USER_SELECTED_current_production_directory
+            else:
+                shp_path = self.settings.baws_USER_SELECTED_manuell_algtolkning_directory
 
         elif selected_data_source == 'raw':
             self.settings.reanalyse = False
