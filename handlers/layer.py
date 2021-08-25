@@ -13,6 +13,8 @@ from builtins import str
 from builtins import range
 from builtins import object
 
+from qgis.PyQt.QtGui import QColor
+
 from qgis.core import (QgsProject,
                        QgsVectorLayer,
                        QgsField,
@@ -20,7 +22,11 @@ from qgis.core import (QgsProject,
                        QgsSimpleFillSymbolLayer,
                        QgsRendererCategory,
                        QgsCategorizedSymbolRenderer,
-                       QgsSimpleLineSymbolLayer)
+                       QgsSimpleLineSymbolLayer,
+                       QgsColorRampShader,
+                       QgsRasterShader,
+                       QgsSingleBandPseudoColorRenderer,
+                       )
 
 import os
 
@@ -129,6 +135,8 @@ class BaseShapeHandler(object):
         :return: GeoPandas.DataFrame
         """
         self.shapes = readers.shape_reader('geopandas', *(path, ))
+        if 'class' in self.shapes:
+            self.shapes = self.shapes.loc[~self.shapes['class'].isna(), :].reset_index(drop=True)
 
 
 class DailyShapeHandler(BaseShapeHandler):
@@ -338,6 +346,11 @@ class LayerHandler(object):
             geom = feat.geometry()
             if geom.area() < 1:
                 feature_ids.append(i)
+            elif type(feat['class']) != int:
+                # This one will be triggered if the user have created
+                # a polygon without setting a proper class value.
+                feature_ids.append(i)
+
         return feature_ids
 
     def change_class_values(self, layer=None, attr='class', class_value=None):
@@ -440,6 +453,30 @@ class LayerHandler(object):
             layer.setRenderer(renderer)
 
         layer.triggerRepaint()
+
+    def categoraize_raster_layer(self, layer=None, layer_name=None):
+        """
+        """
+        if not layer:
+            layer = self.get_layer_by_name(layer_name)
+        if not layer:
+            return
+
+        fnc = QgsColorRampShader()
+        fnc.setColorRampType(QgsColorRampShader.Discrete)
+        fnc.setColorRampItemList([
+            QgsColorRampShader.ColorRampItem(0, QColor(0, 0, 0, 0), '-'),
+            QgsColorRampShader.ColorRampItem(1, QColor(187, 187, 187), '1 - Cloud'),
+            QgsColorRampShader.ColorRampItem(2, QColor(255, 255, 26), '2 - Subsurface'),
+            QgsColorRampShader.ColorRampItem(3, QColor(247, 126, 60), '3 - Surface'),
+            QgsColorRampShader.ColorRampItem(4, QColor(0, 0, 0), 'NoData')
+        ])
+
+        shader = QgsRasterShader()
+        shader.setRasterShaderFunction(fnc)
+
+        renderer = QgsSingleBandPseudoColorRenderer(layer.dataProvider(), 1, shader)
+        layer.setRenderer(renderer)
 
     def get_output_layer(self, layer_name=None):
         """
