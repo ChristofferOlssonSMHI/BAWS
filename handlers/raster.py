@@ -10,13 +10,16 @@ import numpy as np
 import geopandas as gpd
 import fiona
 from fiona.crs import to_string
+from shapely.geometry import Polygon, MultiPolygon, mapping
+from shapely.ops import polygonize
 import rasterio
 from rasterio import features
 from rasterio.features import shapes, rasterize
+from .. import utils
 
 
 def area2transform_baws1000_sweref99tm():
-    crs = rasterio.crs.CRS.from_string('+init=epsg:3006')
+    crs = rasterio.crs.CRS.from_string('epsg:3006')
     west, south, east, north = (-49739.0, 5954123.0, 1350261.0, 7354123.0)
     height, width = (1400, 1400)
     transform = rasterio.transform.from_bounds(west, south,
@@ -213,5 +216,70 @@ class RasterHandler(object):
         schema = {'properties': [('class', 'int')], 'geometry': 'Polygon'}
         crs, transform, area_shape = area2transform_baws1000_sweref99tm()
 
+        with fiona.open(output_filename, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
+            dst.writerecords(shape_list)
+
+    def merge_scene_rasters(self, layer_names=None, directory=None, output_filename=None):
+        crs, transform, shape = area2transform_baws1000_sweref99tm()
+
+        daily_array = np.array(())
+        for fid in layer_names:
+            rst = rasterio.open(os.path.join(directory, fid))
+            array = rst.read()
+            array = array[0].astype(int)
+
+            if not daily_array.size:
+                daily_array = array
+            else:
+                daily_array = np.where(np.logical_and(daily_array == 1, array == 0), 0, daily_array)
+                daily_array = np.where(daily_array == 4, array, daily_array)
+                daily_array = np.where(np.logical_and(daily_array != 3, array == 2), 2, daily_array)
+                daily_array = np.where(array == 3, 3, daily_array)
+
+        bloom_array = np.where(np.logical_or(daily_array == 3, daily_array == 2), 2, np.zeros(daily_array.shape))
+        bloom_array = np.where(daily_array == 1, 1, bloom_array).astype(np.uint8)
+
+        bloom_shape_list = self.get_shapes_from_raster(bloom_array, None, daymaps=False)
+        valid_areas = utils.valid_baws_area()
+        mask_features = []
+        for shape in bloom_shape_list:
+            if type(shape['geometry']['coordinates'][0]) == list:
+                poly = Polygon(shape['geometry']['coordinates'][0])
+            else:
+                poly = Polygon(shape['geometry']['coordinates'])
+
+            if not poly.is_empty:
+                if poly.area < valid_areas[2]:
+                    # valid_areas[2]: valid area for class 2 (and 3) bloom
+                    mask_features.append(shape["geometry"])
+                elif shape['properties']['class'] == 1:
+                    if poly.area < valid_areas[1]:
+                        # valid_areas[1]: valid area for class 1 (cloud))
+                        mask_features.append(shape["geometry"])
+
+        mask = rasterize(mask_features, bloom_array.shape, transform=transform)
+        daily_array = np.where(mask == 1, 0, daily_array)
+
+        shapes_from_raster = self.get_shapes_from_raster(daily_array, None, daymaps=False)
+        shape_list = []
+        for shape in shapes_from_raster:
+            if type(shape['geometry']['coordinates'][0]) == list:
+                poly = Polygon(shape['geometry']['coordinates'][0])
+            else:
+                poly = Polygon(shape['geometry']['coordinates'])
+            if not poly.is_valid:
+                be = poly.exterior
+                mls = be.intersection(be)
+                polygons = polygonize(mls)
+                valid_bowtie = MultiPolygon(polygons)
+                for poly_of_multi in list(valid_bowtie):
+                    if poly_of_multi.is_valid:
+                        new_shape = shape.copy()
+                        new_shape['geometry'] = mapping(poly_of_multi)
+                        shape_list.append(new_shape)
+            else:
+                shape_list.append(shape)
+
+        schema = {'properties': [('class', 'int')], 'geometry': 'Polygon'}
         with fiona.open(output_filename, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
             dst.writerecords(shape_list)

@@ -82,9 +82,7 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
                        len(args))
 
     def merge_selected_shapefiles(self, settings, categorize=True):
-        """
-        :return:
-        """
+        """"""
         print('Starting merging work. Usually takes ~5-30 seconds, depending on size and number of geometries..')
         start_time = time.time()
         merge_file_path = os.path.join(settings.user_temporary_folder, 'Cyano_merged.shp')
@@ -92,16 +90,37 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
                                                output_filename=merge_file_path,
                                                mask_path=settings.raster_valid_area_file_path)
 
+        self.import_merged_file(merge_file_path, categorize=categorize)
+
+        print("merge_selected_shapefiles completed in --%.2f sec\n" % (time.time() - start_time))
+
+    def merge_selected_rasterfiles(self, settings, categorize=True):
+        """"""
+        print('Starting merging work. Usually takes ~5-30 seconds, depending on size and number of geometries..')
+        start_time = time.time()
+        merge_file_path = os.path.join(settings.user_temporary_folder, 'Cyano_merged.shp')
+        self.raster_handler.merge_scene_rasters(
+            layer_names=self.layer_handler.active_cyano_tiff_layers_name,
+            directory=settings.baws_USER_SELECTED_level_2_directory,
+            output_filename=merge_file_path,
+        )
+
+        self.import_merged_file(merge_file_path, categorize=categorize)
+
+        print("merge_selected_rasterfiles completed in --%.2f sec\n" % (time.time() - start_time))
+
+    def import_merged_file(self, merge_file_path, categorize=False, filter_invalid_areas=False):
+        """"""
         args = (merge_file_path, 'Cyano_merged', "ogr")
         layer = readers.shape_reader('qgis', *args)
-        not_valid_feature_ids = self.layer_handler.get_not_valid_feature_ids(layer=layer)
-        self.layer_handler.delete_features(layer, feature_ids=not_valid_feature_ids)
+        if filter_invalid_areas:
+            not_valid_feature_ids = self.layer_handler.get_not_valid_feature_ids(layer=layer)
+            self.layer_handler.delete_features(layer, feature_ids=not_valid_feature_ids)
         QgsProject.instance().addMapLayer(layer)
         if categorize:
             self.layer_handler.categorize_layer(layer_name='Cyano_merged', attr='class')
 
         self.layer_handler.deactivate_layers(self.layer_handler.active_layers, exclude_layers=['Cyano_merged'])
-        print("merge_scene_shapes completed in --%.2f sec\n" % (time.time() - start_time))
 
     def intersect_geometries(self):
         raise NotImplementedError

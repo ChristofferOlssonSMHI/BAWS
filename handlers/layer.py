@@ -176,6 +176,22 @@ class LayerHandler(object):
         self.number_of_layers_merged = None
 
     @property
+    def active_cyano_tiff_layers(self):
+        """
+        Here we intend to use only cyano.tiff files
+        :return:
+        """
+        return [layer for layer in self.iface.mapCanvas().layers() if layer.name().endswith('cyano.tiff')]
+
+    @property
+    def active_cyano_tiff_layers_name(self):
+        """
+        Here we intend to use only cyano.tiff files
+        :return:
+        """
+        return [layer.name() for layer in self.iface.mapCanvas().layers() if layer.name().endswith('cyano.tiff')]
+
+    @property
     def active_layers(self):
         """
         Here we intend to use only .shp files
@@ -469,7 +485,7 @@ class LayerHandler(object):
             QgsColorRampShader.ColorRampItem(1, QColor(187, 187, 187), '1 - Cloud'),
             QgsColorRampShader.ColorRampItem(2, QColor(255, 255, 26), '2 - Subsurface'),
             QgsColorRampShader.ColorRampItem(3, QColor(247, 126, 60), '3 - Surface'),
-            QgsColorRampShader.ColorRampItem(4, QColor(0, 0, 0), 'NoData')
+            QgsColorRampShader.ColorRampItem(4, QColor(0, 0, 0), '4 - NoData')
         ])
 
         shader = QgsRasterShader()

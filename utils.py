@@ -17,7 +17,7 @@ from threading import Thread
 
 def valid_baws_area():
     """
-    valid_area = 5000000 m2 (5 pixels (1km3 x 1km3))
+    valid_area = 5000000 m2 (5 pixels (1km2 x 1km2))
     1: valid_area * 2
     2: valid_area
     3: valid_area
@@ -34,6 +34,10 @@ def valid_baws_area():
         3: 5000000,
         4: 500000000
     }
+
+
+def get_filename(fid):
+    return os.path.basename(fid)
 
 
 def sleep_while_saving(file_paths):

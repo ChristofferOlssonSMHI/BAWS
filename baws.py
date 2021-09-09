@@ -43,7 +43,7 @@ import time
 
 from .baws_provider import BAWSProvider
 from .config import Settings
-from .utils import thread_process
+from .utils import thread_process, get_filename
 
 from qgis.PyQt.QtCore import QCoreApplication, QDate, Qt
 from qgis.PyQt.QtGui import QIcon, QPixmap
@@ -272,7 +272,11 @@ class BAWSPlugin(object):
             return
 
         self._load_rasterfiles(path=rst_path, backup_path=self.settings.baws_USER_SELECTED_tiff_archive_directory)
-        self._load_shapefiles(path=shp_path, categorize=True)
+        if self.settings.reanalyse:
+            self._load_shapefiles(path=shp_path, categorize=True)
+        else:
+            self._load_raster_scenes(path=shp_path, categorize=True)
+
         self._load_baltic_coastline()
 
         # print('\nBAWS task completed!')
@@ -340,16 +344,34 @@ class BAWSPlugin(object):
                      '\n\nMissing files:\n' +
                      '\n'.join(inform_data_manager))
 
+    def _load_raster_scenes(self, path=None, categorize=True):
+        """"""
+        files = self.settings.generate_filepaths(
+            path,
+            pattern=self.settings.current_working_date,
+            endswith='.tiff'
+        )
+
+        if self.settings.PROD_system:
+            # If PROD environment is set, we look for data in TEST-folder as well.
+            files_in_test = self.settings.generate_filepaths(
+                self.settings.baws_TEST_level_2_directory,
+                pattern=self.settings.current_working_date,
+                endswith='.tiff'
+            )
+            files = chain(files, files_in_test)
+
+        for fid in files:
+            layer = readers.raster_reader('qgis', fid, get_filename(fid))
+            QgsProject.instance().addMapLayer(layer)
+            if categorize:
+                self.provider.baws.layer_handler.categoraize_raster_layer(layer=layer)
+
     def _load_rasterfiles(self, path='', backup_path=''):
         """
         :param path:
         :return:
         """
-        def import_layer(args):
-            layer = readers.raster_reader('qgis', *args)
-            QgsProject.instance().addMapLayer(layer)
-            print('Alrighty then! Raster loaded: %s\n' % layer.name())
-
         def loop_files(generator, time_filter, files_checked=None):
             for fid in generator:
                 file_name = fid.split('\\')[-1]
@@ -358,8 +380,9 @@ class BAWSPlugin(object):
                     files_checked[file_name] = True
                     if time_filter(file_name):
                         continue
-                    args = (fid, file_name)
-                    import_layer(args)
+                    layer = readers.raster_reader('qgis', fid, file_name)
+                    QgsProject.instance().addMapLayer(layer)
+                    print('Alrighty then! Raster loaded: %s\n' % layer.name())
 
         print('Loading raster files for date %s ' % self.settings.current_working_date)
         files = self.settings.generate_filepaths(path,
@@ -431,8 +454,10 @@ class BAWSPlugin(object):
         """
         :return:
         """
-        if any(self.provider.baws.layer_handler.active_layers):
-            self.provider.baws.merge_selected_shapefiles(self.settings)
+        # if any(self.provider.baws.layer_handler.active_layers):
+        #     self.provider.baws.merge_selected_shapefiles(self.settings)
+        if any(self.provider.baws.layer_handler.active_cyano_tiff_layers):
+            self.provider.baws.merge_selected_rasterfiles(self.settings)
             print('\nBAWS task completed!')
         else:
             print('No active layer given ?')
