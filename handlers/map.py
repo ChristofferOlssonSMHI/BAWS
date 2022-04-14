@@ -46,7 +46,7 @@ class MapHandler(BaseMapping):
 
         if colormap_properties is None:
             try:
-                self.colormap_properties = self._set_cmap_porperties(source_path)
+                self.colormap_properties = self._set_map_properties(source_path)
             except:
                 self.colormap_properties = colormap_properties
         else:
@@ -101,7 +101,7 @@ class MapHandler(BaseMapping):
         if any(patches):
             map_axes.add_collection(PatchCollection(patches, match_original=True))
 
-    def _set_map_porperties(self, path_prop):
+    def _set_map_properties(self, path_prop):
         """
         :param unique_raster_values:
         :return:

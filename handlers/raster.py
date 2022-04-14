@@ -6,6 +6,7 @@ Created on 2020-05-13 16:39
 
 """
 import os
+import time
 import numpy as np
 import geopandas as gpd
 import fiona
@@ -143,29 +144,31 @@ class RasterHandler(object):
         else:
             mask = None
 
+        blooms = {0, 2, 3}
+        others = {0, 1, 4}
         if daymaps:
             covered = False
-            for i, (s, v) in enumerate(shapes(raster, mask=mask, transform=transform)):
+            for s, v in shapes(raster, mask=mask, transform=transform):
                 if v != 4:
                     covered = True
-                if v in [0, 1, 4]:
+                if v in others:
                     continue
                 shapes_with_properties.append({'properties': classes[int(v)], 'geometry': s})
             if not covered:
                 return None
 
             # Clouds ontop!
-            for i, (s, v) in enumerate(shapes(raster, transform=transform)):
-                if v in [0, 2, 3]:
+            for s, v in shapes(raster, transform=transform):
+                if v in blooms:
                     continue
                 shapes_with_properties.append({'properties': classes[int(v)], 'geometry': s})
         else:
-            covered = False
-            for i, (s, v) in enumerate(shapes(raster, mask=mask, transform=transform)):
+            start_time = time.time()
+            for s, v in shapes(raster, mask=mask, transform=transform):
                 if v == 0:
                     continue
                 shapes_with_properties.append({'properties': classes[int(v)], 'geometry': s})
-
+            print("loop complete:--%.5f sec" % (time.time() - start_time))
         return shapes_with_properties
 
     def merge_scene_shapes(self, layer_names=None, output_filename=None, mask_path=None):
@@ -197,9 +200,10 @@ class RasterHandler(object):
 
             # Exclude areas marked with class value 2 or 3 outside of our "valid_baws_area".
             # Mask value 1 marks valid area; Maske value 0 marks not valid area
-            array = np.where(np.logical_and(mask == 0,
-                                            np.logical_or(array == 2, array == 3)),
-                             0, array)
+            array = np.where(
+                np.logical_and(mask == 0, np.logical_or(array == 2, array == 3)),
+                0, array
+            )
             arrays.append(array)
 
         daily_array = arrays[0]
@@ -221,7 +225,6 @@ class RasterHandler(object):
 
     def merge_scene_rasters(self, layer_names=None, directory=None, output_filename=None):
         crs, transform, shape = area2transform_baws1000_sweref99tm()
-
         daily_array = np.array(())
         for fid in layer_names:
             rst = rasterio.open(os.path.join(directory, fid))
@@ -236,31 +239,36 @@ class RasterHandler(object):
                 daily_array = np.where(np.logical_and(daily_array != 3, array == 2), 2, daily_array)
                 daily_array = np.where(array == 3, 3, daily_array)
 
-        bloom_array = np.where(np.logical_or(daily_array == 3, daily_array == 2), 2, np.zeros(daily_array.shape))
-        bloom_array = np.where(daily_array == 1, 1, bloom_array).astype(np.uint8)
+        bloom_array = np.where(
+            np.logical_or(daily_array == 3, daily_array == 2), 2,
+            np.zeros(daily_array.shape)
+        )
+        bloom_array = np.where(daily_array == 1, 0,
+                               bloom_array).astype(np.uint8)
+        if bloom_array.any():
+            bloom_shape_list = self.get_shapes_from_raster(bloom_array, None, daymaps=False)
+            valid_areas = utils.valid_baws_area()
+            mask_features = []
+            for shape in bloom_shape_list:
+                if type(shape['geometry']['coordinates'][0]) == list:
+                    poly = Polygon(shape['geometry']['coordinates'][0])
+                else:
+                    poly = Polygon(shape['geometry']['coordinates'])
 
-        bloom_shape_list = self.get_shapes_from_raster(bloom_array, None, daymaps=False)
-        valid_areas = utils.valid_baws_area()
-        mask_features = []
-        for shape in bloom_shape_list:
-            if type(shape['geometry']['coordinates'][0]) == list:
-                poly = Polygon(shape['geometry']['coordinates'][0])
-            else:
-                poly = Polygon(shape['geometry']['coordinates'])
-
-            if not poly.is_empty:
-                if poly.area < valid_areas[2]:
-                    # valid_areas[2]: valid area for class 2 (and 3) bloom
-                    mask_features.append(shape["geometry"])
-                elif shape['properties']['class'] == 1:
-                    if poly.area < valid_areas[1]:
-                        # valid_areas[1]: valid area for class 1 (cloud))
+                if not poly.is_empty:
+                    if poly.area < valid_areas[2]:
+                        # valid_areas[2]: valid area for class 2 (and 3) bloom
                         mask_features.append(shape["geometry"])
-
-        mask = rasterize(mask_features, bloom_array.shape, transform=transform)
-        daily_array = np.where(mask == 1, 0, daily_array)
-
+                    # elif shape['properties']['class'] == 1:
+                    #     if poly.area < valid_areas[1]:
+                    #         # valid_areas[1]: valid area for class 1 (cloud))
+                    #         mask_features.append(shape["geometry"])
+            mask = rasterize(mask_features, bloom_array.shape, transform=transform)
+            daily_array = np.where(mask == 1, 0, daily_array)
+        start_time = time.time()
         shapes_from_raster = self.get_shapes_from_raster(daily_array, None, daymaps=False)
+        print("get_shapes_from_raster:--%.5f sec" % (time.time() - start_time))
+        print('len(shapes_from_raster)', len(shapes_from_raster))
         shape_list = []
         for shape in shapes_from_raster:
             if type(shape['geometry']['coordinates'][0]) == list:
@@ -281,5 +289,6 @@ class RasterHandler(object):
                 shape_list.append(shape)
 
         schema = {'properties': [('class', 'int')], 'geometry': 'Polygon'}
-        with fiona.open(output_filename, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
+        with fiona.open(output_filename, 'w', driver='ESRI Shapefile',
+                        crs=to_string(crs), schema=schema) as dst:
             dst.writerecords(shape_list)
