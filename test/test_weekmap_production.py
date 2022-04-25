@@ -5,9 +5,6 @@ Created on 2019-07-22 15:54
 @author: a002028
 
 """
-from __future__ import print_function
-
-from builtins import range
 import geopandas as gp
 import pandas as pd
 import shapely

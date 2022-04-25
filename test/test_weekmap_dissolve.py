@@ -5,8 +5,6 @@ Created on 2019-07-22 16:19
 @author: a002028
 
 """
-from __future__ import print_function
-from builtins import range
 import geopandas as gp
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon

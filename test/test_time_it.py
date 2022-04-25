@@ -5,8 +5,6 @@ Created on 2019-07-26 11:02
 @author: a002028
 
 """
-from __future__ import print_function
-
 import time
 import os
 

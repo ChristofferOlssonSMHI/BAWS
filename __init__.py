@@ -23,15 +23,14 @@
 __author__ = 'SMHI'
 __date__ = '2019-04-17'
 __copyright__ = '(C) 2019 by SMHI'
-__version__ = '3.1.2'
+__version__ = '3.2.0'
 
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load BAWS class from file BAWS.
 
-    :param iface: A QGIS interface instance.
-    :type iface: QgisInterface
+    iface (QgisInterface): A QGIS interface instance.
     """
     #
     from .baws import BAWSPlugin

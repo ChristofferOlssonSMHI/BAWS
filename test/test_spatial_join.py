@@ -5,9 +5,6 @@ Created on 2019-07-29 08:18
 @author: a002028
 
 """
-from __future__ import print_function
-
-from builtins import range
 import time
 import geopandas as gp
 import matplotlib.pyplot as plt

@@ -7,7 +7,6 @@
      (at your option) any later version.
 
 """
-from __future__ import absolute_import
 from .utilities import get_qgis_app
 
 __author__ = 'ismailsunni@yahoo.co.id'

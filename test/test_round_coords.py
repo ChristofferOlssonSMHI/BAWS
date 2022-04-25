@@ -5,7 +5,6 @@ Created on 2019-07-24 11:22
 @author: a002028
 
 """
-from __future__ import print_function
 import geopandas as gp
 from shapely.wkt import loads
 import re

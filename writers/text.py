@@ -3,28 +3,21 @@
 Created on 2019-05-16 15:10
 
 @author: a002028
-
 """
-from __future__ import print_function
-from builtins import object
 import numpy as np
 import pandas as pd
 
 
-class PandasWriterBase(object):
-    """
-    """
+class PandasWriterBase:
+    """"""
+
     def __init__(self):
+        """Initialize."""
         super(PandasWriterBase, self).__init__()
 
     @staticmethod
     def write(*args, **kwargs):
-        """
-        :param layer:
-        :param args:
-        :param kwargs:
-        :return:
-        """
+        """"""
         if 'df' in kwargs:
             df = kwargs['df']
             del kwargs['df']
@@ -40,41 +33,34 @@ class PandasWriterBase(object):
             print('Could not identify any dataframe within kwargs')
 
 
-class NumpyWriterBase(object):
-    """
-    """
+class NumpyWriterBase:
+    """"""
+
     def __init__(self):
+        """Initialize."""
         super(NumpyWriterBase, self).__init__()
 
     @staticmethod
     def write(*args, **kwargs):
-        """
-        :param args:
-        :param kwargs:
-        :return:
-        """
+        """"""
         np.savetxt(*args, **kwargs)
 
 
-class NoneWriterBase(object):
-    """
-    Dummy base
-    """
+class NoneWriterBase:
+    """Dummy base."""
+
     def __init__(self):
+        """Initialize."""
         super(NoneWriterBase, self).__init__()
 
     @staticmethod
     def write(*args, **kwargs):
+        """"""
         print('Warning! No text was written due to unrecognizable datatype')
 
 
 def text_writer(writer_type, *args, **kwargs):
-    """
-    :param layer:
-    :param args:
-    :param kwargs:
-    :return:
-    """
+    """"""
     if writer_type is 'pandas':
         base = PandasWriterBase
     elif writer_type is 'numpy':
@@ -83,9 +69,10 @@ def text_writer(writer_type, *args, **kwargs):
         base = NoneWriterBase
 
     class TextWriter(base):
-        """
-        """
+        """"""
+
         def __init__(self):
+            """Initialize."""
             super(TextWriter, self).__init__()
 
     tw = TextWriter()

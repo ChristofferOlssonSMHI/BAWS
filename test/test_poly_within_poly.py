@@ -5,15 +5,9 @@ Created on 2019-07-24 15:22
 @author: a002028
 
 """
-from __future__ import print_function
-from builtins import range
-import re
-import shapely
-from shapely.wkt import loads
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon
 import geopandas as gp
-import pandas as pd
 
 
 def explode(indf):

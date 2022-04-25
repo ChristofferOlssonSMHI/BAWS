@@ -3,11 +3,7 @@
 Created on 2019-05-20 16:42
 
 @author: a002028
-
 """
-from __future__ import print_function
-
-from builtins import str
 import os
 import time
 from decimal import Decimal, ROUND_HALF_UP
@@ -16,12 +12,7 @@ from threading import Thread
 
 
 def valid_baws_area():
-    """
-    valid_area = 5000000 m2 (5 pixels (1km2 x 1km2))
-    1: valid_area * 2
-    2: valid_area
-    3: valid_area
-    4: valid_area * 100
+    """Return dictionary with acceptable area (m2) per class label.
 
     1: cloud (grey)
     2: subsurface bloom (yellow)
@@ -36,11 +27,12 @@ def valid_baws_area():
     }
 
 
-def get_filename(fid):
-    return os.path.basename(fid)
-
-
 def sleep_while_saving(file_paths):
+    """Sleep while a file is under modification.
+
+    Args:
+        file_paths: Iterable of file paths.
+    """
     changes = {path: os.path.getmtime(path) for path in file_paths}
     change = True
     while change:
@@ -56,9 +48,10 @@ def sleep_while_saving(file_paths):
 
 
 def get_file_sizes(files):
-    """
-    :param files:
-    :return:
+    """Return dictionary with file sizes.
+
+    Args:
+        files: Iterable of file paths.
     """
     dictionary = {}
     for path in files:
@@ -67,25 +60,30 @@ def get_file_sizes(files):
 
 
 def round_value(value, nr_decimals=2, out_format=str):
+    """Round value.
+
+    Args:
+        value: Value to round.
+        nr_decimals: Number of decimal values.
+        out_format: Eg. str/float
     """
-    Calculate rounded value
-    :param value:
-    :param nr_decimals:
-    :param out_format:
-    :return:
-    """
-    return out_format(Decimal(str(value)).quantize(Decimal('%%1.%sf' % nr_decimals % 1), rounding=ROUND_HALF_UP))
+    return out_format(
+        Decimal(str(value)).quantize(
+            Decimal('%%1.%sf' % nr_decimals % 1),
+            rounding=ROUND_HALF_UP
+        )
+    )
 
 
 def recursive_dict_update(d, u):
-    """
-    Recursive dictionary update using
-    Copied from:
-        http://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
-        via satpy
-    :param d: Dictionary to update
-    :param u: New dictionary to insert to d
-    :return: d updated with u
+    """Recursive dictionary update.
+
+    Copied from: http://stackoverflow.com/questions/3232943/update-
+                 value-of-a-nested-dictionary-of-varying-depth
+
+    Args:
+        d: Dictionary to update
+        u: New dictionary to insert to d
     """
     for k, v in list(u.items()):
         if isinstance(v, Mapping):
@@ -97,10 +95,49 @@ def recursive_dict_update(d, u):
 
 
 def thread_process(call_function, *args, **kwargs):
-    """
-    :param call_function:
-    :param args:
-    :param kwargs:
-    :return:
+    """Thread a given function.
+
+    Args:
+        call_function: Function to start.
+        *args: Arguments to pass to function.
+        **kwargs: Keyword arguments to pass to function.
     """
     Thread(target=call_function, args=args, kwargs=kwargs).start()
+
+
+def generate_filepaths(directory, pattern='', not_pattern='DUMMY_PATTERN',
+                       pattern_list=None, endswith='', only_from_dir=True):
+    """"""
+    pattern_list = pattern_list or []
+    if os.path.isdir(directory):
+        for path, subdir, fids in os.walk(directory):
+            if only_from_dir:
+                if path != directory:
+                    continue
+            for f in fids:
+                if pattern in f and not_pattern not in f and f.endswith(
+                        endswith):
+                    if any(pattern_list):
+                        for pat in pattern_list:
+                            if pat in f:
+                                yield os.path.abspath(os.path.join(path, f))
+                    else:
+                        yield os.path.abspath(os.path.join(path, f))
+
+
+def generate_dir_paths(directory, pattern='', not_pattern='DUMMY_PATTERN',
+                       endswith=''):
+    """"""
+    for path, subdir, fids in os.walk(directory):
+        if not_pattern and not_pattern in path:
+            continue
+
+        if pattern:
+            if endswith:
+                if pattern in path and path.endswith(endswith):
+                    yield path
+            else:
+                if pattern in path:
+                    yield path
+        if endswith and path.endswith(endswith):
+            yield path

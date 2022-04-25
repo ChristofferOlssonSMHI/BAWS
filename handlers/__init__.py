@@ -13,6 +13,5 @@ from .map import MapHandler
 from .raster import RasterHandler
 from .reanalysis import ReanalysisHandler
 from .statistics import StatHandler
-from .stw import STWHandler
 from .text import TextFileHandler
 from .update_test import TESTHandler

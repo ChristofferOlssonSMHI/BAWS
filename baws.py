@@ -19,11 +19,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import print_function
-from __future__ import absolute_import
-
-from builtins import filter
-from builtins import object
 __author__ = 'SMHI'
 __date__ = '2019-04-17'
 __copyright__ = '(C) 2019 by SMHI'
@@ -43,7 +38,7 @@ import time
 
 from .baws_provider import BAWSProvider
 from .config import Settings
-from .utils import thread_process, get_filename
+from . import utils
 
 from qgis.PyQt.QtCore import QCoreApplication, QDate, Qt
 from qgis.PyQt.QtGui import QIcon, QPixmap
@@ -64,8 +59,16 @@ from qgis.core import (QgsVectorLayer,
                        QgsProcessingProvider,
                        QgsApplication)
 
+"""
+In order to compile resources.py do the following:
+In OSGeo4W Shell: [C:/Users/{USER_NAME_HERE}/.qgis2/python/plugins/BAWS>] 
+pyrcc4 -py3 resources.qrc -o resources.py
+
+OBS: Might only work with QGIS 2 Shell 
 # IMPORTANT TO LOAD resources in order to reach pictures etc..
-from . import resources
+"""
+from . import resources  # DO NOT REMOVE IMPORT
+
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -74,14 +77,13 @@ if cmd_folder not in sys.path:
 
 from . import readers
 from . import handlers
-from . import subprocesses
 
 
 def arrange_layer_order(layers):
-    """
-    QgsProject.instance().legendLayersAdded.connect(arrange_layer_order)
-    :param layers:
-    :return:
+    """Set order of imported layers in QGIS.
+
+    Args:
+        layers: list of layer objects.
     """
     root = QgsProject.instance().layerTreeRoot()
     order = root.customLayerOrder()
@@ -92,26 +94,33 @@ def arrange_layer_order(layers):
     root.setCustomLayerOrder(order)
 
 
-class BAWSPlugin(object):
+class BAWSPlugin:
+    """The main class for this BAWS plugin."""
 
     def __init__(self, iface):
+        """Initialize.
 
+        Args:
+            iface (QgisInterface): The QGIS interface instance.
+        """
         self.iface = iface
         qgis.utils.iface.actionShowPythonDialog().trigger()
 
-        self.settings = Settings(__version__)
+        self.settings = Settings()
         self.settings.set_environment(self.qmb)
         self.settings.check_production_folders(self.qmb)
         self._date_check = self.settings.selected_date
 
         self.provider = BAWSProvider()
-        self.provider.baws.initializeLayerHandler(self.iface,
-                                                  self.settings)
-        self.provider.baws.initializeFerryBoxHandler(self.settings)
+        self.provider.baws.initialize_layer_handler(self.iface,
+                                                    self.settings)
+        # self.provider.baws.initialize_ferrybox_handler(self.settings)
 
-        self.provider.baws.initializeRasterHandler(self.settings.raster_template_file_path)
+        self.provider.baws.initialize_raster_handler(
+            self.settings.raster_template_file_path)
 
-        # self.calendar = Calendar(self.settings)
+        self.provider.baws.initialize_plot_handler()
+
         self.calendar = Calendar(self)
 
         self.actions = []
@@ -120,134 +129,103 @@ class BAWSPlugin(object):
         self.toolbar.setObjectName('BAWSPlugin')
 
     def initGui(self):
-        """
-        # In order to compile resources.py do the following:
+        """Initialize QGIS plugin.
 
-        ##########      ONLY WORKS WITH QGIS 2 Shell      ##########
-        # in OSGeo4W Shell: [C:/Users/{USER_NAME_HERE}/.qgis2/python/plugins/BAWS>] pyrcc4 -py3 resources.qrc -o resources.py
-
-        :return:
+        Including the creation of buttons within the QGIS interface.
+        Note that resources needs to be compiled.
         """
         QgsApplication.processingRegistry().addProvider(self.provider)
         QgsProject.instance().legendLayersAdded.connect(arrange_layer_order)
 
-        self.add_action(':/plugins/BAWS/resources/icons8-download-from-cloud-filled-32.png',
-                        text=self.tr('Load production data'),
-                        checkable=False,
-                        callback=self._load_data,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-download-from-cloud-filled-32.png',
+            text=self.tr('Load production data'),
+            callback=self._load_data,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-merge-files-32.png',
-                        text=self.tr('Merge shapefiles'),
-                        checkable=False,
-                        callback=self._merge_shapes,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-merge-files-32.png',
+            text=self.tr('Merge shapefiles'),
+            callback=self._merge_shapes,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-minus-32.png',
-                        text=self.tr('Exclude class geometries'),
-                        checkable=False,
-                        callback=self._exclude_geometries,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-minus-32.png',
+            text=self.tr('Exclude class geometries'),
+            callback=self._exclude_geometries,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-categorize-32.png',
-                        text=self.tr('Categorize BAWS-layer'),
-                        checkable=False,
-                        callback=self._categorize_tool,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-categorize-32.png',
+            text=self.tr('Categorize BAWS-layer'),
+            callback=self._categorize_tool,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-transfer-32.png',
-                        text=self.tr('Change class value'),
-                        checkable=False,
-                        callback=self._change_attribute_value,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-transfer-32.png',
+            text=self.tr('Change class value'),
+            callback=self._change_attribute_value,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-save-as-filled-32.png',
-                        text=self.tr('Save BAWS-files'),
-                        checkable=False,
-                        callback=self._save_files,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-save-as-filled-32.png',
+            text=self.tr('Save BAWS-files'),
+            callback=self._save_files,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-world-map-32.png',
-                        text=self.tr('Create BAWS-maps and statistics'),
-                        checkable=False,
-                        callback=self._create_maps_and_statistics,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-world-map-32.png',
+            text=self.tr('Create BAWS-maps and statistics'),
+            callback=self._create_maps_and_statistics,
+        )
 
-        self.add_action(':/plugins/BAWS/resources/icons8-event-24.png',
-                        text=self.tr('Calendar settings'),
-                        checkable=False,
-                        callback=self._change_calendar_date,
-                        parent=self.iface.mainWindow(),
-                        )
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-event-24.png',
+            text=self.tr('Calendar settings'),
+            callback=self._change_calendar_date,
+        )
 
     def _change_calendar_date(self):
-        """
-        :return:
-        """
+        """Show the calendar."""
         self.calendar.show()
 
-    def dummy_func(self):
-        print('dummy_func')
-
     def unload(self):
-        """
-        :return:
-        """
+        """Unload the plugin."""
         QgsApplication.processingRegistry().removeProvider(self.provider)
 
-    def add_action(self,
-                   icon_path,
-                   text,
-                   callback,
-                   enabled_flag=True,
-                   checkable=False,
-                   add_to_menu=True,
-                   add_to_toolbar=True,
-                   status_tip=None,
-                   whats_this=None,
-                   menu=None,
-                   parent=None):
+    def add_action(self, icon_path, text=None, callback=None):
+        """Add action button to QGIS interface.
 
+        Args:
+            icon_path: path to icon.
+            text: Hover text for button.
+            callback: Connected method to run ones the button is triggerd.
+        """
         icon = QIcon(icon_path)
-        action = QAction(icon, text, parent)
+        action = QAction(icon, text, self.iface.mainWindow())
         action.triggered.connect(callback)
-        action.setEnabled(enabled_flag)
-        action.setCheckable(checkable)
-
-        if status_tip is not None:
-            action.setStatusTip(status_tip)
-
-        if whats_this is not None:
-            action.setWhatsThis(whats_this)
-
-        if menu is not None:
-            action.setMenu(menu)
-
-        if add_to_toolbar:
-            self.toolbar.addAction(action)
-
-        if add_to_menu:
-            self.iface.addPluginToVectorMenu(
-                self.menu,
-                action)
-
+        action.setEnabled(True)
+        action.setCheckable(False)
+        self.toolbar.addAction(action)
+        self.iface.addPluginToVectorMenu(self.menu, action)
         self.actions.append(action)
 
-        return action
-
     def _load_data(self):
+        """Load data.
+
+        Loading data based on the users selection on:
+            - Date
+            - TEST / PROD
+            - New data / Old production data
+
+        Rasters to load:
+            - Level 1: (true color/"ocean color")
+            - Level 2: BAWS algorithm layer (class 0-4)
         """
-        :return:
-        """
-        if (self.settings.current_working_timestamp < self.settings.timestamp_yesterday
-            and self.settings.current_working_timestamp in self.settings.log.dict) \
+        if (self.settings.current_working_timestamp
+            < self.settings.timestamp_yesterday
+            and self.settings.current_working_timestamp in
+            self.settings.log.dict) \
                 or self.settings.data_in_production_folder_with_working_date:
             selected_data_source = self.qmb_reanalysis()
         else:
@@ -271,45 +249,61 @@ class BAWSPlugin(object):
             self.settings.reanalyse = False
             return
 
-        self._load_rasterfiles(path=rst_path, backup_path=self.settings.baws_USER_SELECTED_tiff_archive_directory)
+        self._load_rasterfiles(
+            path=rst_path,
+            backup_path=self.settings.baws_USER_SELECTED_tiff_archive_directory
+        )
         if self.settings.reanalyse:
             self._load_shapefiles(path=shp_path, categorize=True)
         else:
             self._load_raster_scenes(path=shp_path, categorize=True)
 
         self._load_baltic_coastline()
-
-        # print('\nBAWS task completed!')
+        print('\nBAWS task completed!')
 
     def _load_shapefiles(self, path='', categorize=False):
-        """
-        :param path:
-        :return:
+        """Load old production data.
+
+        Args:
+            path: Selected directory
+            categorize: If true the layer will be categorized using
+                        the classes 1-4
         """
         # self.provider.baws.ferrybox_handler.read()
         # fb_check = self.provider.baws.ferrybox_handler.process()
         fb_check = False
 
-        print('Loading shapefiles for date %s ' % self.settings.current_working_date)
+        print(f'Loading shapefiles for date '
+              f'{self.settings.current_working_date}')
         if self.settings.reanalyse:
-            files = self.settings.generate_filepaths(path,
-                                                     pattern='_'.join(('daymap', self.settings.current_working_date)),
-                                                     endswith='.shp')
+            files = utils.generate_filepaths(
+                path,
+                pattern=f'daymap_{self.settings.current_working_date}',
+                endswith='.shp'
+            )
         else:
-            files = self.settings.generate_filepaths(path,
-                                                     pattern=self.settings.current_working_date,
-                                                     endswith='.shp')
+            files = utils.generate_filepaths(
+                path,
+                pattern=self.settings.current_working_date,
+                endswith='.shp'
+            )
 
         if self.settings.PROD_system and not self.settings.reanalyse:
-            # If PROD environment is set, we look for data in TEST-folder as well as in the PROD-data folder.
-            files_in_test = self.settings.generate_filepaths(self.settings.baws_TEST_level_2_directory,
-                                                             pattern=self.settings.current_working_date,
-                                                             endswith='.shp')
+            # If PROD environment is set, we look for data in
+            # TEST-folder as well as in the PROD-data folder.
+            files_in_test = utils.generate_filepaths(
+                self.settings.baws_TEST_level_2_directory,
+                pattern=self.settings.current_working_date,
+                endswith='.shp'
+            )
             files = chain(files, files_in_test)
 
         if fb_check and not self.settings.reanalyse:
-            ferry_box_file = self.settings.generate_filepaths(self.settings.user_temporary_folder,
-                                                              pattern=self.settings.current_working_date, endswith='.shp')
+            ferry_box_file = utils.generate_filepaths(
+                self.settings.user_temporary_folder,
+                pattern=self.settings.current_working_date,
+                endswith='.shp'
+            )
             files = chain(files, ferry_box_file)
 
         inform_data_manager = []
@@ -318,43 +312,55 @@ class BAWSPlugin(object):
             layer_name = fid.split('\\')[-1]
             if layer_name in files_checked:
                 # File already loaded from PROD-data folder.
-                print('layer {} already loaded'.format(layer_name))
+                print(f'layer {layer_name} already loaded')
                 continue
 
-            args = (fid, layer_name, "ogr")
-            layer = readers.shape_reader('qgis', *args)
+            layer = readers.shape_reader('qgis', fid, layer_name, "ogr")
             if self.settings.reanalyse:
                 layer.setName('Cyano_merged')
             QgsProject.instance().addMapLayer(layer)
             files_checked[layer_name] = fid
-            print('Alrighty then! Shapefile loaded: %s\n' % layer.name())
+            print(f'Shapefile loaded: {layer.name()}\n')
             if categorize:
-                self.provider.baws.layer_handler.categorize_layer(layer=layer, attr='class')
+                self.provider.baws.layer_handler.categorize_layer(
+                    layer=layer, attr='class'
+                )
             if self.settings.PROD_system and 'prodtest' in fid:
-                # Means that we are now using data from TEST-environment. Inform SATSA-Teknik of this..
+                # Means that we are now using data from TEST-environment.
+                # Inform SATSA-Teknik of this..
                 inform_data_manager.append(layer_name)
 
-        self.provider.baws.rasterize_shapefiles(list(files_checked.values()),
-                                                save_path=self.settings.user_temporary_folder)
+        self.provider.baws.rasterize_shapefiles(
+            list(files_checked.values()),
+            save_path=self.settings.user_temporary_folder
+        )
         print('rasterize_shapefiles in progress, as thread process!')
         if any(inform_data_manager):
-            self.mbx('Satellite Level 2 data have been found in TEST data-folder but are missing in PROD-data folder '
+            self.mbx('Satellite Level 2 data have been found in TEST '
+                     'data-folder but are missing in PROD-data folder '
                      '(not good). '
                      '\nPlease inform SATSA-Teknik of this error!'
                      '\n\nMissing files:\n' +
                      '\n'.join(inform_data_manager))
 
     def _load_raster_scenes(self, path=None, categorize=True):
-        """"""
-        files = self.settings.generate_filepaths(
+        """Load level 2 BAWS algorithm data (class 0-4).
+
+        Args:
+            path: Selected directory
+            categorize: If true the layer will be categorized using
+                        the classes 1-4
+        """
+        files = utils.generate_filepaths(
             path,
             pattern=self.settings.current_working_date,
             endswith='.tiff'
         )
 
         if self.settings.PROD_system:
-            # If PROD environment is set, we look for data in TEST-folder as well.
-            files_in_test = self.settings.generate_filepaths(
+            # If PROD environment is set, we look for data in
+            # TEST-folder as well.
+            files_in_test = utils.generate_filepaths(
                 self.settings.baws_TEST_level_2_directory,
                 pattern=self.settings.current_working_date,
                 endswith='.tiff'
@@ -362,15 +368,19 @@ class BAWSPlugin(object):
             files = chain(files, files_in_test)
 
         for fid in files:
-            layer = readers.raster_reader('qgis', fid, get_filename(fid))
+            layer = readers.raster_reader('qgis', fid, os.path.basename(fid))
             QgsProject.instance().addMapLayer(layer)
             if categorize:
-                self.provider.baws.layer_handler.categoraize_raster_layer(layer=layer)
+                self.provider.baws.layer_handler.categoraize_raster_layer(
+                    layer=layer
+                )
 
     def _load_rasterfiles(self, path='', backup_path=''):
-        """
-        :param path:
-        :return:
+        """Load level 1 data (true color/"ocean color" images).
+
+        Args:
+            path: Selected directory
+            backup_path: Backup directory (used in PROD mode)
         """
         def loop_files(generator, time_filter, files_checked=None):
             for fid in generator:
@@ -382,38 +392,44 @@ class BAWSPlugin(object):
                         continue
                     layer = readers.raster_reader('qgis', fid, file_name)
                     QgsProject.instance().addMapLayer(layer)
-                    print('Alrighty then! Raster loaded: %s\n' % layer.name())
+                    print(f'Raster loaded: {layer.name()}\n')
 
-        print('Loading raster files for date %s ' % self.settings.current_working_date)
-        files = self.settings.generate_filepaths(path,
-                                                 pattern=self.settings.current_working_date,
-                                                 endswith='.tif')
-        backup_files = self.settings.generate_filepaths(backup_path,
-                                                        pattern=self.settings.current_working_date,
-                                                        endswith='.tif')
+        print(f'Loading raster files for date '
+              f'{self.settings.current_working_date}')
+        files = utils.generate_filepaths(
+            path,
+            pattern=self.settings.current_working_date,
+            endswith='.tif'
+        )
+        backup_files = utils.generate_filepaths(
+            backup_path,
+            pattern=self.settings.current_working_date,
+            endswith='.tif'
+        )
         files_checked = {}
-        loop_files(files, self.settings.time_filter, files_checked=files_checked)
-        loop_files(backup_files, self.settings.time_filter, files_checked=files_checked)
+        loop_files(files, self.settings.time_filter,
+                   files_checked=files_checked)
+        loop_files(backup_files, self.settings.time_filter,
+                   files_checked=files_checked)
 
     def _load_baltic_coastline(self):
-        """
-        :return:
-        """
+        """Load coastline layer."""
         start_time = time.time()
-        args = (self.settings.baltic_coastline_file_path,
-                'Baltic_coastline_sweref99',
-                "ogr")
-        layer = readers.shape_reader('qgis', *args)
+        layer = readers.shape_reader(
+            'qgis', self.settings.baltic_coastline_file_path,
+            'Baltic_coastline_sweref99', "ogr"
+        )
         QgsProject.instance().addMapLayer(layer)
-        self.provider.baws.layer_handler.categorize_line_layer(layer=layer,
-                                                               attr='FID_1',
-                                                               layer_name='Baltic_coastline_sweref99')
-        print("Baltic_costline_sweref99 loaded in --%.3f sec" % (time.time() - start_time))
+        self.provider.baws.layer_handler.categorize_line_layer(
+            layer=layer,
+            attr='FID_1',
+            layer_name='Baltic_coastline_sweref99'
+        )
+        print("Baltic_costline_sweref99 loaded in --%.3f "
+              "sec" % (time.time() - start_time))
 
     def _categorize_tool(self):
-        """
-        :return:
-        """
+        """Categorize an active shape layer (classes: 1-4)."""
         layer_name = None
         for name in self.provider.baws.layer_handler.active_layers_name:
             if '_costline_' in name:
@@ -423,16 +439,16 @@ class BAWSPlugin(object):
                 break
 
         if layer_name:
-            layer = self.provider.baws.layer_handler.get_layer_by_name(layer_name)
-            self.provider.baws.layer_handler.categorize_layer(layer=layer, attr='class')
+            layer = self.provider.baws.layer_handler.get_layer_by_name(
+                layer_name)
+            self.provider.baws.layer_handler.categorize_layer(
+                layer=layer, attr='class')
             print('\nBAWS task completed!')
         else:
             print('No active layer given ?')
 
     def _change_attribute_value(self):
-        """
-        :return:
-        """
+        """Change class value of a selected geometry in QGIS."""
         selected_class_value = self.qmb_change_attribute_value()
         if selected_class_value:
             layer_name = None
@@ -442,20 +458,22 @@ class BAWSPlugin(object):
                     break
 
             if layer_name:
-                layer = self.provider.baws.layer_handler.get_layer_by_name(layer_name)
-                self.provider.baws.layer_handler.change_class_values(layer=layer,
-                                                                     attr='class',
-                                                                     class_value=selected_class_value)
+                layer = self.provider.baws.layer_handler.get_layer_by_name(
+                    layer_name)
+                self.provider.baws.layer_handler.change_class_values(
+                    layer=layer,
+                    attr='class',
+                    class_value=selected_class_value
+                )
                 print('\nBAWS task completed!')
             else:
                 print('No active layer given ?')
 
     def _merge_shapes(self):
+        """Merge layers.
+
+        As of 2022 we use raster layers instead of shape layers.
         """
-        :return:
-        """
-        # if any(self.provider.baws.layer_handler.active_layers):
-        #     self.provider.baws.merge_selected_shapefiles(self.settings)
         if any(self.provider.baws.layer_handler.active_cyano_tiff_layers):
             self.provider.baws.merge_selected_rasterfiles(self.settings)
             print('\nBAWS task completed!')
@@ -463,15 +481,17 @@ class BAWSPlugin(object):
             print('No active layer given ?')
 
     def _save_files(self):
-        """
-        :return:
-        """
-        # if not self.settings.reanalyse:
+        """Save the work."""
         if True:
-            question = ['Save your adjusted Cyano_merged layer with accompanying tif files.\n',
-                        'Is this selection of tif files correct?']
-            string_list = question + self.provider.baws.layer_handler.active_tif_layer_names
-            user_answer = self.qmb(*('BAWS (%s) Question' % __version__, '\n'.join(string_list)))
+            string_list = [
+                'Save your adjusted Cyano_merged layer with accompanying '
+                'tif files.\n',
+                'Is this selection of tif files correct?'
+            ]
+            string_list.extend(
+                self.provider.baws.layer_handler.active_tif_layer_names)
+            user_answer = self.qmb(*(f'BAWS ({__version__}) Question',
+                                     '\n'.join(string_list)))
             if user_answer:
                 self.provider.baws.save_files(self.settings, self.mbx)
                 print('\nBAWS task completed!')
@@ -479,56 +499,52 @@ class BAWSPlugin(object):
             else:
                 print('\nPlease select files and click save again.\n')
 
-        # else:
-        #     # reanalyse
-        #     question = 'Save your adjusted Cyano_merged layer?'
-        #     user_answer = self.qmb(*('BAWS (%s) Question' % __version__, question))
-        #     if user_answer:
-        #         # self.provider.baws.save_files(self.settings, None, layer_name=self.rh.current_filename,
-        #         #                               daily_outpath=self.settings.reanalysis_reanalyzed_data_directory,
-        #         #                               save_union_bloom=False,
-        #         #                               copy_tif_files=False,
-        #         #                               create_text_files=False,
-        #         #                               create_stw_files=False,
-        #         #                               create_weekly_map=False)
-        #         # Delete layer
-        #         # self.provider.baws.layer_handler.delete_layers(name=self.rh.current_filename)
-        #         self.provider.baws.layer_handler.delete_layers(all=True)
-        #         self.rh.update_file()
-        #         self._reanalyse_tool()
-        #     else:
-        #         print('\nNo file saved.')
-
     def _continue_with_plotting_maps(self):
-        """
-        :return:
-        """
-        question = 'Would you like to plot daily and weekly maps based on your saved files?'
-        user_answer = self.qmb(*('BAWS (%s) Question' % __version__, question))
+        """Continue with plotting png (question)."""
+        question = 'Would you like to plot daily and weekly maps based on ' \
+                   'your saved files? '
+        user_answer = self.qmb(f'BAWS ({__version__}) Question', question)
         if user_answer:
-            self._create_maps_and_statistics(daymap_path=self.settings.cyano_daymap_path,
-                                             weekmap_path=self.settings.cyano_weekmap_path)
+            self._create_maps_and_statistics(
+                daymap_path=self.settings.cyano_daymap_path,
+                weekmap_path=self.settings.cyano_weekmap_path
+            )
 
     def process_daily_map(self, handler, path):
-        """"""
+        """Process daily data.
+
+        Args:
+            handler: Data handler.
+            path: File path
+        """
         handler.read(path)
-        handler.calculate_area()
+        # handler.calculate_area()
         handler.change_csr()
         self.provider.baws.daily_map(handler, file_path=path)
 
     def process_weekly_map(self, handler, path):
-        """"""
+        """Process weekly data.
+
+        Args:
+            handler: Data handler.
+            path: File path
+        """
         handler.read(path)
-        handler.calculate_area()
+        # handler.calculate_area()
         handler.change_csr()
         self.provider.baws.weekly_map(handler, file_path=path)
 
     def _create_maps_and_statistics(self, daymap_path=None, weekmap_path=None):
-        """
-        :return:
+        """Plot the saved shapefiles to png files.
+
+        Args:
+            daymap_path: Path to daymap shapefile
+            weekmap_path: Path to weekmap shapefile
         """
         if not (daymap_path and weekmap_path):
-            file_path = self.qfd(*('BAWS ({}) Open File'.format(__version__), self.settings.baws_USER_SELECTED_current_production_directory))
+            file_path = self.qfd(
+                f'BAWS ({__version__}) Open File',
+                self.settings.baws_USER_SELECTED_current_production_directory)
             # daymap_path = file_path[0].replace('/', '\\')
             daymap_path = file_path[0]
             weekmap_path = self.find_path(daymap_path,
@@ -542,41 +558,40 @@ class BAWSPlugin(object):
         wm_shape_handler = handlers.WeeklyShapeHandler()
 
         start_time = time.time()
-        if daymap_path and weekmap_path:
-            # Daily data / stats
-            stat_handler = handlers.StatHandler(self.settings, objects=[dm_shape_handler, wm_shape_handler])
-            thread_process(stat_handler.save_statistics)
+        # if daymap_path and weekmap_path:
+        #     # Daily data / stats
+        #     stat_handler = handlers.StatHandler(
+        #         self.settings,
+        #         objects=[dm_shape_handler, wm_shape_handler]
+        #     )
+        #     utils.thread_process(stat_handler.save_statistics)
 
-        # Matplotlib is not thread safe
-        # thread_process(self.process_daily_map, dm_shape_handler, daymap_path)
         if daymap_path:
             self.process_daily_map(dm_shape_handler, daymap_path)
         # dm_shape_handler.read(daymap_path)
 
         # Weekly data / stats
-        # Matplotlib is not thread safe
-        # thread_process(self.process_weekly_map, wm_shape_handler, weekmap_path)
         if weekmap_path:
             self.process_weekly_map(wm_shape_handler, weekmap_path)
 
-        if self.settings.PROD_system:
-            thread_process(self.settings.test_handler.copy_prod_files_to_test_system)
+        self.provider.baws.initialize_plot_handler(reset=True)
 
-        print("_create_maps_and_statistics completed in --%.1f sec" % (time.time() - start_time))
+        if self.settings.PROD_system:
+            utils.thread_process(
+                self.settings.test_handler.copy_prod_files_to_test_system)
+
+        print("maps and statistics completed in --%.1f sec"
+              "" % (time.time() - start_time))
         print('\nBAWS task completed!')
 
-    def _summarize_statistics(self):
-        """
-        :return:
-        """
-        raise NotImplementedError
+    @staticmethod
+    def find_path(path, replace_tag='', replace_with=''):
+        """Check path.
 
-    def find_path(self, path, replace_tag='', replace_with=''):
-        """
-        :param path:
-        :param replace_tag:
-        :param replace_with:
-        :return:
+        Args:
+            path: path to file.
+            replace_tag (str): string to replace
+            replace_with (str): string to add
         """
         path = path.replace(replace_tag, replace_with)
         if os.path.isfile(path):
@@ -587,14 +602,16 @@ class BAWSPlugin(object):
         return path
 
     def _exclude_geometries(self):
-        """
-        :return:
-        """
+        """Filter out invalid geometries."""
         class_list = self.qmb_exclude_geometries()
         if any(class_list):
-            layer = self.provider.baws.layer_handler.get_layer_by_name('Cyano_merged')
+            layer = self.provider.baws.layer_handler.get_layer_by_name(
+                'Cyano_merged')
             if layer:
-                self.provider.baws.layer_handler.delete_class_geometries(layer, class_list=class_list)
+                self.provider.baws.layer_handler.delete_class_geometries(
+                    layer,
+                    class_list=class_list
+                )
                 print('\nBAWS task completed!')
             else:
                 print('No layer named Cyano_merged')
@@ -605,140 +622,140 @@ class BAWSPlugin(object):
 
     @date_check.setter
     def date_check(self, new_value):
-        """
-        Callback
+        """Set value to the property date_check.
+
         When the user changes the working date, the user will get the
-        option of deleting previously loaded data
-        :param new_value:
-        :return:
+        option of deleting previously loaded data.
+
+        Args:
+            new_value: New date
         """
         old_date = self._date_check
         self._date_check = new_value
-        if old_date != new_value and any(self.provider.baws.layer_handler.all_layers):
-            question = 'You have change date. Would you like delete all layers before loading new ones?'
-            user_answer = self.qmb(*('BAWS (%s) Question' % __version__, question))
+        if old_date != new_value and any(
+                self.provider.baws.layer_handler.all_layers):
+            question = 'You have change date. Would you like to delete all ' \
+                       'layers before loading new ones? '
+            user_answer = self.qmb(f'BAWS ({__version__}) Question', question)
             if user_answer:
                 self.provider.baws.layer_handler.delete_layers(all=True)
                 self.settings.reset_folder(self.settings.user_temporary_folder)
 
     @staticmethod
     def qfd(*args):
-        """
-        QFileDialog.getOpenFileName(qfd, title, path)
-        :param args: title, path
-        :return:
-        """
+        """Return dialog window."""
         return QFileDialog.getOpenFileName(QFileDialog(), *args)
 
     @staticmethod
     def qmb_exclude_geometries():
-        """
-        :return:
-        """
-        msgBox = QMessageBox()
-        msgBox.setText('Choose which type of polygons you would like to delete? All polygons based on your selection will be deleted!')
-        msgBox.setWindowTitle("BAWS (%s) Question" % __version__)
-        red_button = msgBox.addButton('Only red', QMessageBox.YesRole)
-        yellow_button = msgBox.addButton('Only yellow', QMessageBox.NoRole)
-        both_button = msgBox.addButton('Both red and yellow', QMessageBox.ActionRole)
-        cancel_button = msgBox.addButton('Cancel', QMessageBox.RejectRole)
-        msgBox.exec_()
+        """Return dialog window."""
+        msgbox = QMessageBox()
+        msgbox.setText('Choose which type of polygons you would like to '
+                       'delete? All polygons based on your selection will be '
+                       'deleted!')
+        msgbox.setWindowTitle(f"BAWS ({__version__}) Question")
+        red_button = msgbox.addButton('Only red', QMessageBox.YesRole)
+        yellow_button = msgbox.addButton('Only yellow', QMessageBox.NoRole)
+        both_button = msgbox.addButton('Both red and yellow',
+                                       QMessageBox.ActionRole)
+        cancel_button = msgbox.addButton('Cancel', QMessageBox.RejectRole)
+        msgbox.exec_()
 
-        if msgBox.clickedButton() == red_button:
+        if msgbox.clickedButton() == red_button:
             return [3]
-        elif msgBox.clickedButton() == yellow_button:
+        elif msgbox.clickedButton() == yellow_button:
             return [2]
-        elif msgBox.clickedButton() == both_button:
+        elif msgbox.clickedButton() == both_button:
             return [2, 3]
-        elif msgBox.clickedButton() == cancel_button:
+        elif msgbox.clickedButton() == cancel_button:
             return []
         else:
             return []
 
     @staticmethod
     def qmb_change_attribute_value():
-        """
-        :return:
-        """
-        msgBox = QMessageBox()
-        msgBox.setText('Swap geometry class values with..')
-        msgBox.setWindowTitle("BAWS (%s) Question" % __version__)
-        red_button = msgBox.addButton('Red (3)', QMessageBox.YesRole)
-        yellow_button = msgBox.addButton('Yellow (2)', QMessageBox.NoRole)
-        cancel_button = msgBox.addButton('Cancel', QMessageBox.RejectRole)
-        msgBox.exec_()
+        """Return dialog window."""
+        msgbox = QMessageBox()
+        msgbox.setText('Swap geometry class values with..')
+        msgbox.setWindowTitle(f"BAWS ({__version__}) Question")
+        red_button = msgbox.addButton('Red (3)', QMessageBox.YesRole)
+        yellow_button = msgbox.addButton('Yellow (2)', QMessageBox.NoRole)
+        cancel_button = msgbox.addButton('Cancel', QMessageBox.RejectRole)
+        msgbox.exec_()
 
-        if msgBox.clickedButton() == red_button:
+        if msgbox.clickedButton() == red_button:
             return 3
-        elif msgBox.clickedButton() == yellow_button:
+        elif msgbox.clickedButton() == yellow_button:
             return 2
-        elif msgBox.clickedButton() == cancel_button:
+        elif msgbox.clickedButton() == cancel_button:
             return None
         else:
             return None
 
     @staticmethod
     def qmb_reanalysis():
-        """
-        :return:
-        """
-        msgBox = QMessageBox()
-        msgBox.setText('You have selected an old date. \nWould you like to load raw data or old data from a previous production work?')
-        msgBox.setWindowTitle("BAWS (%s) Question" % __version__)
-        raw_button = msgBox.addButton('Raw data', QMessageBox.YesRole)
-        old_button = msgBox.addButton('Old production data', QMessageBox.NoRole)
-        cancel_button = msgBox.addButton('Cancel', QMessageBox.RejectRole)
-        msgBox.exec_()
+        """Return dialog window."""
+        msgbox = QMessageBox()
+        msgbox.setText('You have selected an old date. \nWould you like to '
+                       'load raw data or old data from a previous production '
+                       'work?')
+        msgbox.setWindowTitle(f"BAWS ({__version__}) Question")
+        raw_button = msgbox.addButton('Raw data', QMessageBox.YesRole)
+        old_button = msgbox.addButton('Old production data', QMessageBox.NoRole)
+        cancel_button = msgbox.addButton('Cancel', QMessageBox.RejectRole)
+        msgbox.exec_()
 
-        if msgBox.clickedButton() == raw_button:
+        if msgbox.clickedButton() == raw_button:
             return 'raw'
-        elif msgBox.clickedButton() == old_button:
+        elif msgbox.clickedButton() == old_button:
             return 'old'
-        elif msgBox.clickedButton() == cancel_button:
+        elif msgbox.clickedButton() == cancel_button:
             return None
         else:
             return None
 
     @staticmethod
     def qmb(*args):
-        """
-        QMessageBox.question()
-        :param args: title, path
-        :return:
-        """
+        """Return dialog window."""
         qm = QMessageBox
         args = args + (qm.Yes | qm.No, )
         user_answer = qm.question(QMessageBox(), *args)
-
         return user_answer == qm.Yes
 
     @staticmethod
     def mbx(text, picture_path=None):
+        """Return dialog window.
+
+        Args:
+            text: Text.
+            picture_path: Path to file.
         """
-        :param text:
-        :return:
-        """
-        msgBox = QMessageBox()
-        msgBox.setWindowTitle("BAWS (%s) Message" % __version__)
+        msgbox = QMessageBox()
+        msgbox.setWindowTitle(f"BAWS ({__version__}) Message")
         if picture_path:
-            msgBox.setIconPixmap(QPixmap(picture_path))
-        msgBox.setText(text)
-        msgBox.exec_()
+            msgbox.setIconPixmap(QPixmap(picture_path))
+        msgbox.setText(text)
+        msgbox.exec_()
 
     @staticmethod
     def tr(message):
-        """
-        :param message:
-        :return:
+        """Return hover text.
+
+        Args:
+            message: Text.
         """
         return QCoreApplication.translate('', message)
 
 
 class Calendar(QWidget):
-    """
-    A QCalendarWidget
-    """
+    """A QCalendarWidget."""
+
     def __init__(self, main_plugin):
+        """Initialize.
+
+        Args:
+            main_plugin: The BAWSPlugin object.
+        """
         # create GUI
         QMainWindow.__init__(self)
         self.plugin = main_plugin
@@ -757,8 +774,11 @@ class Calendar(QWidget):
         self.cal.setFirstDayOfWeek(Qt.Monday)
 
         self.vbox.addWidget(self.cal)
-        qd = self.get_qdate()
-        self.cal.setSelectedDate(QDate(*qd))
+        self.cal.setSelectedDate(
+            QDate(self.plugin.settings.current_working_timestamp.year,
+                  self.plugin.settings.current_working_timestamp.month,
+                  self.plugin.settings.current_working_timestamp.day)
+        )
 
         # Create a label which we will use to show the date a week from now
         self.lbl = QLabel()
@@ -775,8 +795,9 @@ class Calendar(QWidget):
         self.ok_box.clicked.connect(self.ok_selected)
 
     def date_changed(self):
-        """
-        Handler called when the date selection has changed
+        """Change the selected date.
+
+        Handler called when the date selection has changed.
         """
         # Fetch the currently selected date, this is a QDate object
         date = self.cal.selectedDate()
@@ -786,15 +807,7 @@ class Calendar(QWidget):
         self.selected_date = pd.Timestamp(pydate)
 
     def ok_selected(self):
-        """
-        """
+        """Change the working date."""
         self.plugin.settings.change_working_date(self.selected_date)
         self.close()
         self.plugin.date_check = self.selected_date
-
-    def get_qdate(self):
-        """
-        """
-        return (self.plugin.settings.current_working_timestamp.year,
-                self.plugin.settings.current_working_timestamp.month,
-                self.plugin.settings.current_working_timestamp.day, )

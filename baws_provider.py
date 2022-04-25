@@ -19,8 +19,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import absolute_import
-
 __author__ = 'SMHI'
 __date__ = '2019-04-17'
 __copyright__ = '(C) 2019 by SMHI'
@@ -35,10 +33,15 @@ from .baws_algorithm import BAWSAlgorithm
 
 
 class BAWSProvider(QgsProcessingProvider):
+    """The plugin provider.
+
+    According to template.
+    """
 
     DUMMY_SETTING = 'DUMMY_SETTING'
 
     def __init__(self):
+        """Initialize."""
         QgsProcessingProvider.__init__(self)
 
         # Deactivate provider by default
@@ -51,9 +54,8 @@ class BAWSProvider(QgsProcessingProvider):
         #     alg.provider = self
 
     def id(self):
-        """
-        """
-        return 'BAWSProvider'
+        """Return class name."""
+        return self.__class__.__name__
 
     def name(self):
         """This is the name that will appear on the toolbox group.
@@ -64,20 +66,26 @@ class BAWSProvider(QgsProcessingProvider):
         return 'baws_provider'
 
     def initializeSettings(self):
-        """In this method we add settings needed to configure our
-        provider.
+        """In this method we add settings needed to configure our provider.
 
         Do not forget to call the parent method, since it takes care
         or automatically adding a setting for activating or
         deactivating the algorithms in the provider.
         """
         QgsProcessingProvider.initializeSettings(self)
-        ProcessingConfig.addSetting(Setting('Example algorithms',
-            BAWSProvider.DUMMY_SETTING,
-            'Example setting', 'Default value'))
+        ProcessingConfig.addSetting(
+            Setting(
+                'Example algorithms',
+                BAWSProvider.DUMMY_SETTING,
+                'Example setting',
+                'Default value'
+            )
+        )
 
     def unload(self):
-        """Setting should be removed here, so they do not appear anymore
+        """Remove self.
+
+        Setting should be removed here, so they do not appear anymore
         when the plugin is unloaded.
         """
         QgsProcessingProvider.unload(self)
@@ -92,16 +100,14 @@ class BAWSProvider(QgsProcessingProvider):
         It is also used to create the command line name of all the
         algorithms from this provider.
         """
-        return 'baws_provider'
+        return self.name()
 
     def getDescription(self):
-        """This is the provired full name.
-        """
+        """This is the provired full name."""
         return 'Provider of layers'
 
     def getIcon(self):
-        """We return the default icon.
-        """
+        """We return the default icon."""
         return QgsProcessingProvider.getIcon(self)
 
     def loadAlgorithms(self):
