@@ -27,4 +27,4 @@ TODO:
 
 Example in QGIS
 ---------------
-![BAWS Example](resources/example_screenshot.png "BAWS Example")
+![BAWS Example](resources/example_screenshot.png)
