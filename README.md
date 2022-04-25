@@ -26,5 +26,6 @@ TODO:
 
 
 Example in QGIS
----------------
+-------
+
 ![BAWS Example](resources/example_screenshot.png)
