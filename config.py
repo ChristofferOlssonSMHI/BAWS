@@ -77,7 +77,8 @@ class Settings:
             '/'.join((self.base_directory.drive, 'BAWS'))
         )
         self.user = Path('~').expanduser().parts[-1]
-        self.user_temporary_folder = Path('~').joinpath('baws_temp')
+        self.user_temporary_folder = Path('~').expanduser().joinpath(
+            'baws_temp')
         self.create_folder(self.user_temporary_folder)
         utils.thread_process(self.reset_folder, self.user_temporary_folder)
 
