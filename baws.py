@@ -367,6 +367,7 @@ class BAWSPlugin:
             )
             files = chain(files, files_in_test)
 
+        root = QgsProject.instance().layerTreeRoot()
         for fid in files:
             layer = readers.raster_reader('qgis', fid, os.path.basename(fid))
             QgsProject.instance().addMapLayer(layer)
@@ -374,6 +375,8 @@ class BAWSPlugin:
                 self.provider.baws.layer_handler.categoraize_raster_layer(
                     layer=layer
                 )
+            node = root.findLayer(layer.id())
+            node.setExpanded(True)
 
     def _load_rasterfiles(self, path='', backup_path=''):
         """Load level 1 data (true color/"ocean color" images).
@@ -382,6 +385,8 @@ class BAWSPlugin:
             path: Selected directory
             backup_path: Backup directory (used in PROD mode)
         """
+        root = QgsProject.instance().layerTreeRoot()
+
         def loop_files(generator, time_filter, files_checked=None):
             for fid in generator:
                 file_name = fid.split('\\')[-1]
@@ -392,6 +397,8 @@ class BAWSPlugin:
                         continue
                     layer = readers.raster_reader('qgis', fid, file_name)
                     QgsProject.instance().addMapLayer(layer)
+                    node = root.findLayer(layer.id())
+                    node.setExpanded(False)
                     print(f'Raster loaded: {layer.name()}\n')
 
         print(f'Loading raster files for date '
@@ -425,6 +432,9 @@ class BAWSPlugin:
             attr='FID_1',
             layer_name='Baltic_coastline_sweref99'
         )
+        root = QgsProject.instance().layerTreeRoot()
+        node = root.findLayer(layer.id())
+        node.setExpanded(False)
         print("Baltic_costline_sweref99 loaded in --%.3f "
               "sec" % (time.time() - start_time))
 

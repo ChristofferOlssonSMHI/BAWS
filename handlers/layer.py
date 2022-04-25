@@ -246,6 +246,30 @@ class LayerHandler:
             QgsProject.instance().layerTreeRoot().findLayer(
                 layer.id()).setItemVisibilityChecked(False)
 
+    @staticmethod
+    def collapse_layers(layers, exclude_layers=None):
+        """"""
+        exclude_layers = exclude_layers or []
+        root = QgsProject.instance().layerTreeRoot()
+        for layer in layers:
+            if layer.name() in exclude_layers:
+                continue
+            print(f'Collapsing: {layer.name()}')
+            node = root.findLayer(layer.id())
+            node.setExpanded(False)
+
+    @staticmethod
+    def expand_layers(layers, exclude_layers=None):
+        """"""
+        exclude_layers = exclude_layers or []
+        root = QgsProject.instance().layerTreeRoot()
+        for layer in layers:
+            if layer.name() in exclude_layers:
+                continue
+            print(f'Expanding: {layer.name()}')
+            node = root.findLayer(layer.id())
+            node.setExpanded(True)
+
     def _delete_layers(self, layers):
         """"""
         try:
