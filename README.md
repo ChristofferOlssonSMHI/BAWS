@@ -28,4 +28,4 @@ TODO:
 Example in QGIS
 -------
 
-![BAWS Example](resources/example_screenshot.png)
+![BAWS Example](https://github.com/JohannesSMHI/BAWS/blob/master/resources/example_screenshot.PNG)
