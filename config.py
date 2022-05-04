@@ -105,6 +105,10 @@ class Settings:
             self.settings_directory.joinpath('longitude_baws10000.npy'),
             self.settings_directory.joinpath('latitude_baws10000.npy')
         ]
+        self.basemap_figure_path = self.settings_directory.joinpath(
+            'baws_cyano_figure.pickle')
+        self.basemap_obj_path = self.settings_directory.joinpath(
+            'baws_basemap.pickle')
 
         self.test_handler = handlers.TESTHandler(self)
         print('USER: {}'.format(self.user))

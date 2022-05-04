@@ -83,14 +83,16 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         if not hasattr(self, 'raster_handler'):
             self.raster_handler = handlers.RasterHandler(rst_template_path)
 
-    def initialize_plot_handler(self, reset=False):
+    def initialize_plot_handler(self, reset=False, path_figure=None,
+                                path_basemap=None):
         """Initialize the plot handler.
 
         Args:
             reset: True/False
         """
         if reset or not hasattr(self, 'plot_handler'):
-            self.plot_handler = handlers.MapHandler()
+            self.plot_handler = handlers.MapHandler(path_basemap=path_basemap,
+                                                    path_figure=path_figure)
             utils.thread_process(self.plot_handler.initialize_maps)
 
     def rasterize_shapefiles(self, args, save_path=None):
@@ -327,7 +329,7 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         )
 
         patches = shape_handler.get_matplotlib_patches(
-            self.plot_handler.day_map,
+            self.plot_handler.map_obj,
             self.plot_handler.day_colormap_properties
         )
         self.plot_handler.plot_patches(
@@ -355,7 +357,7 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         )
 
         patches = shape_handler.get_matplotlib_patches(
-            self.plot_handler.week_map,
+            self.plot_handler.map_obj,
             self.plot_handler.week_colormap_properties
         )
         self.plot_handler.plot_patches(

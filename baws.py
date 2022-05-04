@@ -119,7 +119,10 @@ class BAWSPlugin:
         self.provider.baws.initialize_raster_handler(
             self.settings.raster_template_file_path)
 
-        self.provider.baws.initialize_plot_handler()
+        self.provider.baws.initialize_plot_handler(
+            path_basemap=self.settings.basemap_obj_path,
+            path_figure=self.settings.basemap_figure_path
+        )
 
         self.calendar = Calendar(self)
 
@@ -584,7 +587,11 @@ class BAWSPlugin:
         if weekmap_path:
             self.process_weekly_map(wm_shape_handler, weekmap_path)
 
-        self.provider.baws.initialize_plot_handler(reset=True)
+        self.provider.baws.initialize_plot_handler(
+            reset=True,
+            path_basemap=self.settings.basemap_obj_path,
+            path_figure=self.settings.basemap_figure_path
+        )
 
         if self.settings.PROD_system:
             utils.thread_process(

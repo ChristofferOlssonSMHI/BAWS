@@ -3,8 +3,8 @@
 Created on 2019-05-22 12:33
 
 @author: a002028
-
 """
+import pickle
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 import matplotlib.cbook as cbook
@@ -13,7 +13,11 @@ from mpl_toolkits.basemap import Basemap
 
 
 def get_basemap(map_axes):
-    """Return standard map object."""
+    """Return standard map object.
+
+    We use these map settings. However,
+    this function is not used in the system, instead we load a pickle file.
+    """
     m = Basemap(
         resolution='i', projection='laea', ellps='bessel',
         width=1400000, height=1400000,
@@ -34,8 +38,15 @@ def get_basemap(map_axes):
 class MapHandler:
     """"""
 
-    def __init__(self):
-        """Initialize."""
+    def __init__(self, path_figure=None, path_basemap=None):
+        """Initialize.
+
+        self.map_obj is used to transform polygon coordinates to the
+        map projection.
+        """
+        self.path_figure = path_figure
+        with open(path_basemap, 'rb') as f:
+            self.map_obj = pickle.load(f)
         self.week_map = None
         self.week_axes = None
         self.week_figure = None
@@ -64,13 +75,13 @@ class MapHandler:
         Takes around 15 seconds per map,
         hence the threading might be a good idea.
         """
-        self.day_figure = plt.figure(figsize=(4.88, 4.88))
-        self.day_axes = self.day_figure.add_subplot(111)
-        self.day_map = get_basemap(self.day_axes)
+        with open(self.path_figure, 'rb') as openfile:
+            self.day_figure = pickle.load(openfile)
+        self.day_axes = self.day_figure.axes[0]
 
-        self.week_figure = plt.figure(figsize=(4.88, 4.88))
-        self.week_axes = self.week_figure.add_subplot(111)
-        self.week_map = get_basemap(self.week_axes)
+        with open(self.path_figure, 'rb') as openfile:
+            self.week_figure = pickle.load(openfile)
+        self.week_axes = self.week_figure.axes[0]
 
     @staticmethod
     def add_picture_to_figure(figure, path_picture='',
@@ -102,12 +113,16 @@ class MapHandler:
 
     @staticmethod
     def save_figure(path, figure):
-        """Save figure."""
+        """Save figure.
+
+        The pickle file used to load this figure
+        already has the following settings:
         figure.tight_layout()
         figure.subplots_adjust(
             top=0.999,
             bottom=0.001,
             right=0.999,
-            left=0.001,
+            left=0.001
         )
+        """
         figure.savefig(path, dpi=287)
