@@ -42,19 +42,22 @@ def create_stw(cyano_file_path, file_tag, lon_path, lat_path):
         out_folder,
         '_'.join(['stw', file_tag]) + '.txt'
     )
-    transform, shape = area2transform_baws10000_sweref99tm()
     with fiona.open(cyano_file_path, "r") as shapefile:
         shapes = []
         for shp in shapefile:
             if shp['properties']['class'] == 3:
                 shapes.append((shp['geometry'], 3))
 
-    burned = features.rasterize(shapes=shapes, fill=0, out=np.zeros(shape),
-                                transform=transform)
-    bloom_indices = np.where(burned == 3)
-    if np.shape(bloom_indices)[1] > 5:
-        coordinates = get_stw_lats_lons(lon_path, lat_path, bloom_indices)
-        np.savetxt(stw_file_path, coordinates, delimiter='\t',
-                   fmt='%1.4f')
+    if shapes:
+        transform, shape = area2transform_baws10000_sweref99tm()
+        burned = features.rasterize(shapes=shapes, fill=0, out=np.zeros(shape),
+                                    transform=transform)
+        bloom_indices = np.where(burned == 3)
+        if np.shape(bloom_indices)[1] > 5:
+            coordinates = get_stw_lats_lons(lon_path, lat_path, bloom_indices)
+            np.savetxt(stw_file_path, coordinates, delimiter='\t',
+                       fmt='%1.4f')
+        else:
+            save_empty_file(stw_file_path)
     else:
         save_empty_file(stw_file_path)

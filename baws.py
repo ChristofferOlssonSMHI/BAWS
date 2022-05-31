@@ -239,14 +239,14 @@ class BAWSPlugin:
             rst_path = self.settings.baws_USER_SELECTED_tiff_archive_directory
 
             if self.settings.data_in_production_folder_with_working_date:
-                shp_path = self.settings.baws_USER_SELECTED_current_production_directory
+                level_2_path = self.settings.baws_USER_SELECTED_current_production_directory
             else:
-                shp_path = self.settings.baws_USER_SELECTED_manuell_algtolkning_directory
+                level_2_path = self.settings.baws_USER_SELECTED_manuell_algtolkning_directory
 
         elif selected_data_source == 'raw':
             self.settings.reanalyse = False
             rst_path = self.settings.baws_USER_SELECTED_level_1_directory
-            shp_path = self.settings.baws_USER_SELECTED_level_2_directory
+            level_2_path = self.settings.baws_USER_SELECTED_level_2_directory
 
         else:
             self.settings.reanalyse = False
@@ -257,9 +257,9 @@ class BAWSPlugin:
             backup_path=self.settings.baws_USER_SELECTED_tiff_archive_directory
         )
         if self.settings.reanalyse:
-            self._load_shapefiles(path=shp_path, categorize=True)
+            self._load_shapefiles(path=level_2_path, categorize=True)
         else:
-            self._load_raster_scenes(path=shp_path, categorize=True)
+            self._load_raster_scenes(path=level_2_path, categorize=True)
 
         self._load_baltic_coastline()
         print('\nBAWS task completed!')
@@ -371,15 +371,19 @@ class BAWSPlugin:
             files = chain(files, files_in_test)
 
         root = QgsProject.instance().layerTreeRoot()
+        loaded_files = set(())
         for fid in files:
-            layer = readers.raster_reader('qgis', fid, os.path.basename(fid))
-            QgsProject.instance().addMapLayer(layer)
-            if categorize:
-                self.provider.baws.layer_handler.categoraize_raster_layer(
-                    layer=layer
-                )
-            node = root.findLayer(layer.id())
-            node.setExpanded(True)
+            name = os.path.basename(fid)
+            if name not in loaded_files:
+                layer = readers.raster_reader('qgis', fid, name)
+                QgsProject.instance().addMapLayer(layer)
+                if categorize:
+                    self.provider.baws.layer_handler.categoraize_raster_layer(
+                        layer=layer
+                    )
+                node = root.findLayer(layer.id())
+                node.setExpanded(True)
+                loaded_files.add(name)
 
     def _load_rasterfiles(self, path='', backup_path=''):
         """Load level 1 data (true color/"ocean color" images).
