@@ -507,10 +507,19 @@ class BAWSPlugin:
             ]
             string_list.extend(
                 self.provider.baws.layer_handler.active_tif_layer_names)
-            user_answer = self.qmb(*(f'BAWS ({__version__}) Question',
-                                     '\n'.join(string_list)))
+            user_answer = self.qmb(
+                f'BAWS ({__version__}) Question', '\n'.join(string_list))
             if user_answer:
-                self.provider.baws.save_files(self.settings, self.mbx)
+                user_answer_text_generate = self.qmb(
+                    f'BAWS ({__version__}) Question',
+                    'Would you like to automatically generate day- and weekmap '
+                    'texts? If No, txt-files will look like they´ve '
+                    'always have.'
+                )
+                self.provider.baws.save_files(
+                    self.settings, self.mbx,
+                    auto_generate_text=user_answer_text_generate
+                )
                 print('\nBAWS task completed!')
                 self._continue_with_plotting_maps()
             else:

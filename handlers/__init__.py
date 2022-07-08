@@ -5,6 +5,7 @@ Created on 2019-05-22 12:03
 @author: a002028
 
 """
+from .auto_texting import DayTexting, WeekTexting
 from .boolean import BaseBoolean
 from .ferry_box import FerryBoxHandler
 from .jsonH import JSONHandler

@@ -209,8 +209,8 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
 
     def save_files(self, settings, gui_mxb, layer_name='Cyano_merged',
                    daily_outpath=None, copy_tif_files=True,
-                   create_text_files=True, create_stw_files=True,
-                   create_weekly_map=True):
+                   create_text_files=True, auto_generate_text=False,
+                   create_stw_files=True, create_weekly_map=True):
         """Save all BAWS files (shp, tiff, png).
 
         Includes format transformations (shp --> tiff and tiff --> shp)
@@ -228,11 +228,6 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         # Daily tif files
         if copy_tif_files:
             self._copy_tif_files(settings)
-
-        # Daily Textfiles
-        if create_text_files:
-            text_handler = handlers.TextFileHandler(settings)
-            utils.thread_process(text_handler.copy_empty_files)
 
         # Daily shp and raster file
         print('Daily shape process...')
@@ -270,6 +265,13 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         if not settings.log.date_in_log(settings.current_working_date):
             settings.log.append_date_to_list(settings.current_working_date)
             settings.log.save()
+
+        # Daily Textfiles
+        if create_text_files:
+            text_handler = handlers.TextFileHandler(settings,
+                                                    auto=auto_generate_text,
+                                                    daymap_path=daily_map_path)
+            utils.thread_process(text_handler.copy_empty_files)
 
         if create_stw_files:
             self._check_for_stw_file(settings, gui_mxb)
