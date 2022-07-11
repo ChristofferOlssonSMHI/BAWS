@@ -514,7 +514,7 @@ class BAWSPlugin:
                     f'BAWS ({__version__}) Question',
                     'Would you like to automatically generate day- and weekmap '
                     'texts? If No, txt-files will look like they´ve '
-                    'always have.'
+                    'always done.'
                 )
                 self.provider.baws.save_files(
                     self.settings, self.mbx,
