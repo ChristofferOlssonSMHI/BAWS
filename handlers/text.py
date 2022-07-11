@@ -31,8 +31,6 @@ class TextFileHandler:
         self.auto_generate = auto
         self.daymap_path = daymap_path.replace('.shp', '.tiff')
         self.weekmap_path = self.daymap_path.replace('_daymap_', '_weekmap_')
-        print('self.daymap_path', self.daymap_path)
-        print('self.weekmap_path', self.weekmap_path)
 
     def adjust_text(self, text):
         """"""
