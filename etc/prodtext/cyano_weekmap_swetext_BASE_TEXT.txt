@@ -1,1 +1,1 @@
-﻿Sammanställning av de 7 senaste dagarna (START_DATE - END_DATE): <...> Utfärdat av: <...>
+﻿Sammanställning av de 7 senaste dagarna ({START_DATE} - {END_DATE}): <...> Utfärdat av: {USER_NAME}

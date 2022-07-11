@@ -20,7 +20,7 @@ class JSONHandler:
     @staticmethod
     def read(file_path=''):
         """"""
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             json_file = json.load(f)
         print('file loaded: {}'.format(file_path))
         return json_file

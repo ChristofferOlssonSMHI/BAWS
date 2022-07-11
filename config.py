@@ -105,6 +105,8 @@ class Settings:
             self.settings_directory.joinpath('longitude_baws10000.npy'),
             self.settings_directory.joinpath('latitude_baws10000.npy')
         ]
+        self.district_path = self.settings_directory.joinpath(
+            'baws_districts.tiff')
         self.basemap_figure_path = self.settings_directory.joinpath(
             'baws_cyano_figure.pickle')
         self.basemap_obj_path = self.settings_directory.joinpath(
@@ -237,6 +239,9 @@ class Settings:
 
         settings = self.jh.read(file_path=settings_path)
         self.set_attributes(self, **settings)
+        settings = self.jh.read(file_path=self.settings_directory.joinpath(
+            'auto_texting.json'))
+        self.set_attributes(self, **{'auto_texting': settings})
         print('\nBAWS settings loaded\n')
 
     def _set_user_selected_directories(self):
@@ -352,3 +357,7 @@ class Settings:
             )
         else:
             return None
+
+
+if __name__ == '__main__':
+    s = Settings()
