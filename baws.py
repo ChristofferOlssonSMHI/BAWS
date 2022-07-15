@@ -425,6 +425,16 @@ class BAWSPlugin:
                    files_checked=files_checked)
         loop_files(backup_files, self.settings.time_filter,
                    files_checked=files_checked)
+        if self.settings.PROD_system:
+            # If PROD environment is set, we look for data in
+            # TEST-folder as well.
+            files_in_test = utils.generate_filepaths(
+                self.settings.baws_TEST_level_1_directory,
+                pattern=self.settings.current_working_date,
+                endswith='.tif'
+            )
+            loop_files(files_in_test, self.settings.time_filter,
+                       files_checked=files_checked)
 
     def _load_baltic_coastline(self):
         """Load coastline layer."""
