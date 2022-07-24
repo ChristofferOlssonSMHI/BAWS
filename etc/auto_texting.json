@@ -87,7 +87,7 @@
         },
         "12-13": {
             "swe": "i Södra och Norra Bottenhavet",
-            "eng": "in the Southern and Northern sea of Bothnia",
+            "eng": "in the Southern and Northern Sea of Bothnia",
             "id_set": [
                 12,
                 13
@@ -178,11 +178,11 @@
         },
         "13": {
             "swe": "i Norra Bottenhavet",
-            "eng": "in the Northern sea of Bothnia"
+            "eng": "in the Northern Sea of Bothnia"
         },
         "12": {
             "swe": "i Södra Bottenhavet",
-            "eng": "in the Southern sea of Bothnia"
+            "eng": "in the Southern Sea of Bothnia"
         },
         "11": {
             "swe": "i Ålands hav",
