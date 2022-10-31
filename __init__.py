@@ -20,10 +20,10 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
-__author__ = 'SMHI'
+__author__ = 'SMHI-JJ'
 __date__ = '2019-04-17'
 __copyright__ = '(C) 2019 by SMHI'
-__version__ = '3.2.2'
+__version__ = '3.2.3'
 
 
 # noinspection PyPep8Naming
