@@ -85,7 +85,6 @@ class BaseShapeHandler:
                 )
             elif poly.geom_type == 'MultiPolygon':
                 for subpoly in poly:
-                    # mpoly = shapely.ops.transform(map_obj, poly)
                     mpoly = shapely.ops.transform(map_obj, subpoly)
                     patches_dict[value].append(descartes.PolygonPatch(
                         mpoly,

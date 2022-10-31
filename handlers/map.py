@@ -54,20 +54,24 @@ class MapHandler:
         self.day_axes = None
         self.day_figure = None
 
-        self.day_colormap_properties = {0: '#000000',  # dummy color
-                                        1: '#7a7a7a',
-                                        2: '#Ffff00',
-                                        3: '#Ff9900',
-                                        4: '#000000'}
+        self.day_colormap_properties = {
+            0: '#000000',  # dummy color
+            1: '#7a7a7a',
+            2: '#ffff00',
+            3: '#ff9900',
+            4: '#000000'
+        }
 
-        self.week_colormap_properties = {0: '#000000',  # dummy color
-                                         1: '#0066ff',
-                                         2: '#00ccff',
-                                         3: '#99e2ff',
-                                         4: '#Ffff33',
-                                         5: '#Ff9933',
-                                         6: '#Ff3300',
-                                         7: '#990000'}
+        self.week_colormap_properties = {
+            0: '#000000',  # dummy color
+            1: '#0066ff',
+            2: '#00ccff',
+            3: '#99e2ff',
+            4: '#ffff33',
+            5: '#ff9933',
+            6: '#ff3300',
+            7: '#990000'
+        }
 
     def initialize_maps(self):
         """Initiate maps.

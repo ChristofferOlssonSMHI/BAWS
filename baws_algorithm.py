@@ -326,7 +326,7 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
 
         self.plot_handler.add_picture_to_figure(
             self.plot_handler.day_figure,
-            path_picture=str(directory.joinpath('resources/legend.png')),
+            path_picture=str(directory.joinpath('resources/daily_legend.png')),
             axes_settings=[0.74, 0.056, 0.2, 0.2]
         )
 
@@ -351,11 +351,17 @@ class BAWSAlgorithm(QgsProcessingAlgorithm):
         if not file_path:
             return
 
+        directory = Path(__file__).parent
         self.plot_handler.add_picture_to_figure(
             self.plot_handler.week_figure,
-            path_picture=str(Path(__file__).parent.joinpath(
-                'resources/smhi-logo.png')),
+            path_picture=str(directory.joinpath('resources/smhi-logo.png')),
             axes_settings=[0.835, 0.86, 0.1, 0.12]
+        )
+
+        self.plot_handler.add_picture_to_figure(
+            self.plot_handler.week_figure,
+            path_picture=str(directory.joinpath('resources/weekly_legend.png')),
+            axes_settings=[0.728, 0.057, 0.3, 0.3]
         )
 
         patches = shape_handler.get_matplotlib_patches(
