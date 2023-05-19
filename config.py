@@ -302,12 +302,17 @@ class Settings:
         if self.selected_date:
             return self.selected_date.strftime("%Y%m%d")
         else:
-            return self.date_yesterday
+            return self.date_today
 
     @property
     def current_working_timestamp(self):
         """Return pandas timestamp of the working date."""
         return pd.Timestamp(self.current_working_date)
+
+    @property
+    def date_today(self):
+        """Return date string for today."""
+        return self.today.strftime("%Y%m%d")
 
     @property
     def date_yesterday(self):
