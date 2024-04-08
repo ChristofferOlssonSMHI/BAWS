@@ -188,6 +188,12 @@ class BAWSPlugin:
             callback=self._change_calendar_date,
         )
 
+        self.add_action(
+            ':/plugins/BAWS/resources/icons8-event-24.png',
+            text=self.tr('Change user name'),
+            callback=self._change_user_name,
+        )
+
     def _change_calendar_date(self):
         """Show the calendar."""
         self.calendar.show()
@@ -785,6 +791,13 @@ class BAWSPlugin:
             message: Text.
         """
         return QCoreApplication.translate('', message)
+    
+    @staticmethod
+    def tfmb(text):
+        """Text field message box."""
+        msgbox = QMessageBox()
+        msgbox.setWindowTItle("User name")
+
 
 
 class Calendar(QWidget):

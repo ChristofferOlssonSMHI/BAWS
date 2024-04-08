@@ -384,11 +384,13 @@ class LayerHandler:
             attr_idx = 0
 
         unique_values = layer.uniqueValues(attr_idx)
+        # Test this
+        layer.editFormConfig().setWidgetType(attr_idx, u'Value Map')
         categories = []
 
-        color_map = {0: '0, 0, 0', 1: '187, 187, 187', 2: '255, 255, 26',
-                     3: '247, 126, 60', 4: '0, 0, 0'}
-        color_map_hex = {0: '#000000', 1: '#bbbbbb', 2: '#ffff1a', 3: '#f77e3c',
+        color_map = {0: '0, 0, 0', 1: '155, 155, 155', 2: '73, 193, 187',
+                     3: '4, 102, 102', 4: '0, 0, 0'}
+        color_map_hex = {0: '#000000', 1: '#9B9B9B', 2: '#49C1BB', 3: '#046666',
                          4: '#000000'}
         for value in unique_values:
             symbol = QgsSymbol.defaultSymbol(layer.geometryType())
@@ -429,8 +431,8 @@ class LayerHandler:
 
         categories = []
 
-        color_map = {0: '0, 0, 0', 1: '21, 153, 137'}
-        color_map_hex = {0: '#000000', 1: '#159989'}
+        color_map = {0: '0, 0, 0', 1: '50, 50, 50'}
+        color_map_hex = {0: '#000000', 1: '#323232'}
         for value in unique_values:
             symbol = QgsSymbol.defaultSymbol(layer.geometryType())
 
@@ -468,11 +470,11 @@ class LayerHandler:
         fnc.setColorRampType(QgsColorRampShader.Discrete)
         fnc.setColorRampItemList([
             QgsColorRampShader.ColorRampItem(0, QColor(0, 0, 0, 0), '-'),
-            QgsColorRampShader.ColorRampItem(1, QColor(187, 187, 187),
+            QgsColorRampShader.ColorRampItem(1, QColor(155, 155, 155),
                                              '1 - Cloud'),
-            QgsColorRampShader.ColorRampItem(2, QColor(255, 255, 26),
+            QgsColorRampShader.ColorRampItem(2, QColor(73, 193, 187),
                                              '2 - Subsurface'),
-            QgsColorRampShader.ColorRampItem(3, QColor(247, 126, 60),
+            QgsColorRampShader.ColorRampItem(3, QColor(4, 102, 102),
                                              '3 - Surface'),
             QgsColorRampShader.ColorRampItem(4, QColor(0, 0, 0), '4 - NoData')
         ])
