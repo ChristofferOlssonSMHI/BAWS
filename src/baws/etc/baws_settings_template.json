@@ -1,0 +1,55 @@
+{
+    "directories": {
+        "baws_PROD_level_2_directory": "",
+        "baws_PROD_manuell_algtolkning_directory": "",
+        "baws_PROD_stw_directory": "",
+        "baws_PROD_level_1_directory": "",
+        "baws_PROD_current_production_directory": "",
+        "baws_PROD_statistics_directory": "",
+        "baws_PROD_tiff_archive_directory": "",
+        "baws_PROD_complementary_data_directory": "",
+        "baws_TEST_level_2_directory": "",
+        "baws_TEST_manuell_algtolkning_directory": "",
+        "baws_TEST_stw_directory": "",
+        "baws_TEST_level_1_directory": "",
+        "baws_TEST_current_production_directory": "",
+        "baws_TEST_statistics_directory": "",
+        "baws_TEST_tiff_archive_directory": "",  
+        "baws_TEST_complementary_data_directory": "",
+        "baws_USER_SELECTED_level_2_directory": "",
+        "baws_USER_SELECTED_manuell_algtolkning_directory": "",
+        "baws_USER_SELECTED_stw_directory": "",
+        "baws_USER_SELECTED_level_1_directory": "",
+        "baws_USER_SELECTED_current_production_directory": "",
+        "baws_USER_SELECTED_statistics_directory": "",
+        "baws_USER_SELECTED_tiff_archive_directory": "",
+        "baws_USER_SELECTED_complementary_data_directory": "",
+        "plugin_directory": "",
+        "reanalysis_log_directory": "",
+        "reanalysis_reanalyzed_data_directory": "",
+        "server_info_directory": "",
+        "local_server_info_directory": ""
+    },
+    "file_paths": {
+    	"raster_template_file_path": "etc_root/raster_template.tiff",
+    	"raster_valid_area_file_path": "etc_root/valid_baws_area/balticsea_valid_cyano_area.tiff",
+    	"baltic_coastline_file_path": "",
+    	"production_log_file_path": ""
+    },
+    "crs_epsg_3006": {
+        "zone": 33, 
+        "ellps": "GRS80", 
+        "init": "epsg:3006", 
+        "no_defs": true, 
+        "proj": "utm", 
+        "units": "m"
+    }, 
+    "crs_epsg_4326": {
+        "datum": "WGS84", 
+        "ellps": "WGS84",
+        "init": "epsg:4326",
+        "no_defs": true, 
+        "proj": "longlat"
+    }, 
+    "crs_wkt": "PROJCS[\"SWEREF99_TM\",GEOGCS[\"GCS_SWEREF99\",DATUM[\"D_SWEREF99\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",15],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"Meter\",1]]"
+}

@@ -1,0 +1,254 @@
+{
+    "day_text_mapper": {
+        "zero": {
+            "swe": "Inga cyanobakterieblomningar är observerade.",
+            "eng": "No cyanobacterial blooms detected."
+        },
+        "subs": {
+            "swe": "Blomningar av cyanobakterier har observerats {AREA_LIST_SUBS}.",
+            "eng": "Blooms of cyanobacteria have been observed {AREA_LIST_SUBS}."
+        },
+        "surfs": {
+            "swe": "Ytansamlingar av cyanobakterier har observerats {AREA_LIST_SURFS}.",
+            "eng": "Surface accumulations of cyanobacteria have been observed {AREA_LIST_SURFS}."
+        },
+        "diverse": {
+            "swe": "Ytansamlingar av cyanobakterier har observerats {AREA_LIST_SURFS}. Lite svagare blomningar finns {AREA_LIST_SUBS}.",
+            "eng": "Surface accumulations of cyanobacteria have been observed {AREA_LIST_SURFS}. Slightly weaker blooms are found {AREA_LIST_SUBS}."
+        }
+    },
+    "week_text_mapper": {
+        "zero": {
+            "swe": "Inga observationer av cyanobakterier under den senaste veckan.",
+            "eng": "No observations of cyanobacteria in the past week."
+        },
+        "few": {
+            "swe": "Under den senaste veckan har ansamlingar av cyanobakterier observerats ett fåtal gånger {AREA_LIST_FEW}.",
+            "eng": "Over the past week, accumulations of cyanobacteria have been observed a few times {AREA_LIST_FEW}."
+        },
+        "diverse": {
+            "swe": "Under den senaste veckan har ansamlingar av cyanobakterier observerats ett flertal gånger {AREA_LIST_MULTI}, samt vid ett fåtal gånger {AREA_LIST_FEW}.",
+            "eng": "Over the past week, accumulations of cyanobacteria have been observed several times {AREA_LIST_MULTI}, and a few times {AREA_LIST_FEW}."
+        },
+        "multi": {
+            "swe": "Under den senaste veckan har ansamlingar av cyanobakterier observerats ett flertal gånger {AREA_LIST_MULTI}.",
+            "eng": "Over the past week, accumulations of cyanobacteria have been observed several times {AREA_LIST_MULTI}."
+        }
+    },
+    "combo_mapper": {
+        "4-5-6-7-8": {
+            "swe": "från Sydvästra Östersjön till Norra Östersjön",
+            "eng": "from the Southwestern Baltic to the Northern Baltic",
+            "id_set": [
+                4,
+                5,
+                6,
+                7,
+                8
+            ]
+        },
+        "5-6-7-8": {
+            "swe": "från Södra Östersjön till Norra Östersjön",
+            "eng": "from the Southern Baltic to the Northern Baltic",
+            "id_set": [
+                5,
+                6,
+                7,
+                8
+            ]
+        },
+        "4-5-6-7": {
+            "swe": "från Sydvästra Östersjön till Mellersta Östersjön",
+            "eng": "from the Southwestern Baltic to the Central Baltic",
+            "id_set": [
+                4,
+                5,
+                6,
+                7
+            ]
+        },
+        "6-7-8": {
+            "swe": "från Sydöstra Östersjön till Norra Östersjön",
+            "eng": "from the Southeastern Baltic to the Northern Baltic",
+            "id_set": [
+                6,
+                7,
+                8
+            ]
+        },
+        "4-5-6": {
+            "swe": "i hela södra Östersjön",
+            "eng": "in the entire Southern Baltic",
+            "id_set": [
+                4,
+                5,
+                6
+            ]
+        },
+        "12-13": {
+            "swe": "i Södra och Norra Bottenhavet",
+            "eng": "in the Southern and Northern Sea of Bothnia",
+            "id_set": [
+                12,
+                13
+            ]
+        }
+    },
+    "cloud_combo_mapper": {
+        "4-5-6-7-8-9-12-13": {
+            "swe": "hela området",
+            "eng": "the entire area",
+            "id_set": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                12,
+                13
+            ]
+        },
+        "4-5-6-7-8": {
+            "swe": "Östersjön",
+            "eng": "the Baltic Proper",
+            "id_set": [
+                4,
+                5,
+                6,
+                7,
+                8
+            ]
+        },
+        "4-5-6": {
+            "swe": "Södra Östersjön",
+            "eng": "the Southern Baltic",
+            "id_set": [
+                4,
+                5,
+                6
+            ]
+        },
+        "7-8": {
+            "swe": "Mellersta och Norra Östersjön",
+            "eng": "the Central and Northern Baltic",
+            "id_set": [
+                7,
+                8
+            ]
+        },
+        "9": {
+            "swe": "Finska viken",
+            "eng": "the Gulf of Finland",
+            "id_set": [
+                9
+            ]
+        },
+        "12-13": {
+            "swe": "Bottenhavet",
+            "eng": "the Sea of Bothnia",
+            "id_set": [
+                12,
+                13
+            ]
+        }
+    },
+    "cloud_ratio_description": {
+        "0-0.3": {
+            "swe":  "Mestadels klart väder över",
+            "eng":  "Mostly clear skies over"
+        },
+        "0.3-0.6": {
+            "swe":  "Delvis molnigt över",
+            "eng":  "Partly cloudy over"
+        },
+        "0.6-1.1": {
+            "swe":  "Mestadels mulet väder över",
+            "eng":  "Mostly cloudy weather over"
+        }
+    },
+    "name_mapper": {
+        "15": {
+            "swe": "i Bottenviken",
+            "eng": "in the Bay of Bothnia"
+        },
+        "14": {
+            "swe": "i Norra Kvarken",
+            "eng": "in the Quark"
+        },
+        "13": {
+            "swe": "i Norra Bottenhavet",
+            "eng": "in the Northern Sea of Bothnia"
+        },
+        "12": {
+            "swe": "i Södra Bottenhavet",
+            "eng": "in the Southern Sea of Bothnia"
+        },
+        "11": {
+            "swe": "i Ålands hav",
+            "eng": "in the Sea of Aaland"
+        },
+        "10": {
+            "swe": "i Skärgårdshavet",
+            "eng": "in the Archipelago Sea"
+        },
+        "9": {
+            "swe": "i Finska viken",
+            "eng": "in the Gulf of Finland"
+        },
+        "8": {
+            "swe": "i Norra Östersjön",
+            "eng": "in the Northern Baltic"
+        },
+        "7": {
+            "swe": "i Mellersta Östersjön",
+            "eng": "in the Central Baltic"
+        },
+        "16": {
+            "swe": "i Rigabukten",
+            "eng": "in the Gulf of Riga"
+        },
+        "6": {
+            "swe": "i Sydöstra Östersjön",
+            "eng": "in the Southeastern Baltic"
+        },
+        "5": {
+            "swe": "i Södra Östersjön",
+            "eng": "in the Southern Baltic"
+        },
+        "4": {
+            "swe": "i Sydvästra Östersjön",
+            "eng": "in the Southwestern Baltic"
+        },
+        "3": {
+            "swe": "i Bälten",
+            "eng": "in the Belts"
+        },
+        "2": {
+            "swe": "i Öresund",
+            "eng": "in the Sounds"
+        },
+        "1": {
+            "swe": "i Kattegatt",
+            "eng": "in the Kattegat"
+        },
+        "id_order": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+        ]
+    }
+}
