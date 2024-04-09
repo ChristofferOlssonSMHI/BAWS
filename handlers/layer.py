@@ -383,9 +383,8 @@ class LayerHandler:
         except:
             attr_idx = 0
 
-        unique_values = layer.uniqueValues(attr_idx)
-        # Test this
-        layer.editFormConfig().setWidgetType(attr_idx, u'Value Map')
+        unique_values = layer.uniqueValues(attr_idx)       
+    
         categories = []
 
         color_map = {0: '0, 0, 0', 1: '155, 155, 155', 2: '73, 193, 187',
