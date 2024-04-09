@@ -188,12 +188,6 @@ class BAWSPlugin:
             callback=self._change_calendar_date,
         )
 
-        self.add_action(
-            ':/plugins/BAWS/resources/icons8-event-24.png',
-            text=self.tr('Change user name'),
-            callback=self._change_user_name,
-        )
-
     def _change_calendar_date(self):
         """Show the calendar."""
         self.calendar.show()
