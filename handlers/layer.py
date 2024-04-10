@@ -386,10 +386,15 @@ class LayerHandler:
         unique_values = layer.uniqueValues(attr_idx)       
     
         categories = []
-
-        color_map = {0: '0, 0, 0', 1: '155, 155, 155', 2: '73, 193, 187',
-                     3: '4, 102, 102', 4: '0, 0, 0'}
-        color_map_hex = {0: '#000000', 1: '#9B9B9B', 2: '#49C1BB', 3: '#046666',
+        # 2 teal, 3 red
+        # color_map = {0: '0, 0, 0', 1: '155, 155, 155', 2: '73, 193, 187',
+        #              3: '4, 102, 102', 4: '0, 0, 0'}
+        # color_map_hex = {0: '#000000', 1: '#9B9B9B', 2: '#49C1BB', 3: '#C24A50',
+        #                  4: '#000000'}
+        # 2 green 3 purple
+        color_map = {0: '0, 0, 0', 1: '155, 155, 155', 2: '140, 194, 74',
+                     3: '128, 74, 194', 4: '0, 0, 0'}
+        color_map_hex = {0: '#000000', 1: '#9B9B9B', 2: '#8CC24A', 3: '#804AC2',
                          4: '#000000'}
         for value in unique_values:
             symbol = QgsSymbol.defaultSymbol(layer.geometryType())
@@ -429,9 +434,12 @@ class LayerHandler:
         unique_values = layer.uniqueValues(attr_idx)
 
         categories = []
-
-        color_map = {0: '0, 0, 0', 1: '50, 50, 50'}
-        color_map_hex = {0: '#000000', 1: '#323232'}
+        # light orange
+        # color_map = {0: '0, 0, 0', 1: '194, 128, 74'}
+        # color_map_hex = {0: '#000000', 1: '#C2804A'}
+        # pink
+        color_map = {0: '0, 0, 0', 1: '188, 74, 194'}
+        color_map_hex = {0: '#000000', 1: '#BC4AC2'}
         for value in unique_values:
             symbol = QgsSymbol.defaultSymbol(layer.geometryType())
 

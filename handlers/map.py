@@ -29,9 +29,10 @@ def get_basemap(map_axes):
         area_thresh=5,
         ax=map_axes
     )
+    # Updated colors but not yet added to baws_basemap.pickle
     m.drawcoastlines(linewidth=0.2, zorder=3)
-    m.fillcontinents(color='#E4F4E7', lake_color='#E4F4E7', zorder=3)
-    m.drawmapboundary(fill_color='white', zorder=3)
+    m.fillcontinents(color='#F5F6F7', lake_color='#D0D6DB', zorder=3)
+    m.drawmapboundary(fill_color='#D0D6DB', zorder=3)
     return m
 
 
@@ -56,9 +57,9 @@ class MapHandler:
 
         self.day_colormap_properties = {
             0: '#000000',  # dummy color
-            1: '#7a7a7a',
-            2: '#ffff00',
-            3: '#ff9900',
+            1: '#9B9B9B',
+            2: '#49C1BB',
+            3: '#046666',
             4: '#000000'
         }
 
