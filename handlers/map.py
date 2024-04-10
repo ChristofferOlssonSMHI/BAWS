@@ -56,9 +56,9 @@ class MapHandler:
 
         self.day_colormap_properties = {
             0: '#000000',  # dummy color
-            1: '#7a7a7a',
-            2: '#ffff00',
-            3: '#ff9900',
+            1: '#9B9B9B',
+            2: '#49C1BB',
+            3: '#046666',
             4: '#000000'
         }
 
