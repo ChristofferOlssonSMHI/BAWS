@@ -3,14 +3,19 @@
 Created on 2019-05-22 12:33
 
 @author: a002028
+Modified by: k000851
+
+Version History:
+    2024-05-02: 
+        - Adds update_figure_basemap function to recreate pickle
+          files used for drawing the day and week bloom maps. 
+        - Changes to cyan colour palette.
 """
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 import matplotlib.cbook as cbook
-
 from mpl_toolkits.basemap import Basemap
-
 
 def get_basemap(map_axes):
     """Return standard map object.
@@ -29,11 +34,27 @@ def get_basemap(map_axes):
         area_thresh=5,
         ax=map_axes
     )
+    # Removes padding
+    map_axes.axis('off')
+
     m.drawcoastlines(linewidth=0.2, zorder=3)
-    m.fillcontinents(color='#E4F4E7', lake_color='#E4F4E7', zorder=3)
-    m.drawmapboundary(fill_color='white', zorder=3)
+    m.fillcontinents(color='#F5F6F7', lake_color='#D0D6DB', zorder=3)
     return m
 
+def update_figure_basemap():
+    """Remakes the pickle files used to create the bloom maps"""
+    fig, ax = plt.subplots(figsize=(4.88, 4.88))
+    # Instead of Basemap.drawmapboundary in get_basemap() which didn't work
+    fig.patch.set_facecolor('#D0D6DB')
+
+    m = get_basemap(ax)
+    # Removes the rest of the padding
+    plt.tight_layout(pad=0)
+    # Overwrites the old pickle files
+    with open(path_basemap, 'wb') as f:
+        pickle.dump(m, f)
+    with open(path_figure, 'wb') as f:
+        pickle.dump(fig, f)
 
 class MapHandler:
     """"""
@@ -56,9 +77,9 @@ class MapHandler:
 
         self.day_colormap_properties = {
             0: '#000000',  # dummy color
-            1: '#7a7a7a',
-            2: '#ffff00',
-            3: '#ff9900',
+            1: '#9B9B9B',
+            2: '#49C1BB',
+            3: '#046666',
             4: '#000000'
         }
 
@@ -119,14 +140,7 @@ class MapHandler:
     def save_figure(path, figure):
         """Save figure.
 
-        The pickle file used to load this figure
-        already has the following settings:
-        figure.tight_layout()
-        figure.subplots_adjust(
-            top=0.999,
-            bottom=0.001,
-            right=0.999,
-            left=0.001
-        )
+        The pickle file used to load this figure has the settings
+        defined in update_figure_basemap().
         """
         figure.savefig(path, dpi=287)

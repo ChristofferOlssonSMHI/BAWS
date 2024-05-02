@@ -152,9 +152,9 @@ class WeekTexting:
 
 class DayTexting:
     """Doc."""
-    swe_text = 'Algsituationen i Östersjön: {WEATHER} {TEXT} ' \
+    swe_text = 'Blomningen i Östersjön: {WEATHER} {TEXT} ' \
                'Utfärdat av: {USER_NAME}'
-    eng_text = 'The algae situation in the Baltic Sea: {WEATHER} {TEXT} ' \
+    eng_text = 'The bloom situation in the Baltic Sea: {WEATHER} {TEXT} ' \
                'Written by: {USER_NAME}'
 
     def __init__(self, path_to_districts, *args,
