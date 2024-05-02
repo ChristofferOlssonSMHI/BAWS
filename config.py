@@ -315,11 +315,6 @@ class Settings:
         return self.today.strftime("%Y%m%d")
 
     @property
-    def date_yesterday(self):
-        """Return date string for yesterday."""
-        return self.timestamp_yesterday.strftime("%Y%m%d")
-
-    @property
     def date_range_composite(self):
         """Return list of dates for the weekly composite product."""
         dr = pd.date_range(self.current_working_timestamp -
